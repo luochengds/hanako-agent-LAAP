@@ -40,7 +40,7 @@ jobs:
 
       - name: Build macOS DMG
         working-directory: ./hanako
-        run: npm run dist
+        run: npm run dist -- --publish never
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
