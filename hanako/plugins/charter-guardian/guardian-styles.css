@@ -1,0 +1,647 @@
+/**
+ * charter-guardian plugin 样式 (P4-charter-guardian)
+ *
+ * Mineradio 风格：深色背景 + 守护主题色
+ *   suspend 橙 / warn 黄 / expel 红 / restore 绿
+ *   三色认知编码：causal 紫 / memory 青 / truth 绿
+ */
+
+/* ── Overlay 容器 ── */
+.guardian-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(8, 12, 20, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e6edf3;
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.guardian-panel-container {
+  width: min(1100px, 92vw);
+  height: min(720px, 88vh);
+  background: linear-gradient(160deg, #0d1117 0%, #161b22 100%);
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6),
+              0 0 32px rgba(124, 77, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.guardian-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #21262d;
+  background: rgba(124, 77, 255, 0.04);
+}
+
+.guardian-panel-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e6edf3;
+  letter-spacing: 0.3px;
+}
+
+.guardian-panel-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #8b949e;
+  margin-left: auto;
+  margin-right: 12px;
+}
+
+.guardian-panel-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3fb950;
+  box-shadow: 0 0 8px rgba(63, 185, 80, 0.6);
+}
+
+.guardian-panel-close {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.guardian-panel-close:hover {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+}
+
+/* ── Dashboard 仪表盘 ── */
+.guardian-dashboard {
+  padding: 14px 20px;
+  border-bottom: 1px solid #21262d;
+  background: rgba(13, 17, 23, 0.5);
+}
+
+.guardian-dashboard h3,
+.guardian-form-section h3,
+.guardian-timeline-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c9d1d9;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.guardian-dashboard h4,
+.guardian-form-section h4,
+.guardian-timeline-section h4 {
+  margin: 10px 0 6px 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.guardian-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.guardian-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+
+.guardian-metric-label {
+  font-size: 11px;
+  color: #8b949e;
+}
+
+.guardian-metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #58a6ff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 状态分布 pills ── */
+.guardian-status-snapshot {
+  margin-top: 10px;
+}
+
+.guardian-status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guardian-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.guardian-status-active {
+  background: rgba(63, 185, 80, 0.12);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.3);
+}
+.guardian-status-suspended {
+  background: rgba(255, 166, 87, 0.12);
+  color: #ffa657;
+  border-color: rgba(255, 166, 87, 0.3);
+}
+.guardian-status-warned {
+  background: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+  border-color: rgba(210, 153, 34, 0.35);
+}
+.guardian-status-expelled {
+  background: rgba(248, 81, 73, 0.12);
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.3);
+}
+.guardian-status-restored {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.35);
+}
+
+/* ── action 分布 bars ── */
+.guardian-action-distribution {
+  margin-top: 10px;
+}
+
+.guardian-action-bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.guardian-action-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border-left: 3px solid;
+  background: rgba(22, 27, 34, 0.6);
+}
+
+.guardian-action-bar-label {
+  font-size: 10px;
+  color: #8b949e;
+  margin-bottom: 2px;
+}
+
+.guardian-action-bar-count {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.guardian-action-suspend {
+  border-left-color: #ffa657;
+}
+.guardian-action-suspend .guardian-action-bar-count {
+  color: #ffa657;
+}
+.guardian-action-warn {
+  border-left-color: #d29922;
+}
+.guardian-action-warn .guardian-action-bar-count {
+  color: #d29922;
+}
+.guardian-action-expel {
+  border-left-color: #f85149;
+}
+.guardian-action-expel .guardian-action-bar-count {
+  color: #f85149;
+}
+.guardian-action-restore {
+  border-left-color: #3fb950;
+}
+.guardian-action-restore .guardian-action-bar-count {
+  color: #3fb950;
+}
+
+/* ── Body 双栏 ── */
+.guardian-panel-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1px;
+  background: #21262d;
+  overflow: hidden;
+}
+
+.guardian-form-section,
+.guardian-timeline-section {
+  padding: 16px 20px;
+  overflow-y: auto;
+  background: #0d1117;
+}
+
+.guardian-form-section {
+  border-right: 1px solid #21262d;
+}
+
+.guardian-form-hint {
+  font-size: 11px;
+  color: #8b949e;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.guardian-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.guardian-form-field span {
+  font-size: 11px;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.guardian-form-field input,
+.guardian-form-field textarea,
+.guardian-form-field select {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  padding: 7px 10px;
+  color: #e6edf3;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.guardian-form-field input:focus,
+.guardian-form-field textarea:focus,
+.guardian-form-field select:focus {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15);
+}
+
+.guardian-form-field textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.guardian-action-select {
+  cursor: pointer;
+}
+
+/* ── Buttons ── */
+.guardian-act-button,
+.guardian-register-button {
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s, transform 0.05s;
+  letter-spacing: 0.3px;
+}
+
+.guardian-act-button {
+  background: linear-gradient(135deg, #7c4dff 0%, #5e2bff 100%);
+  color: #fff;
+  margin-top: 4px;
+}
+.guardian-act-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8b5eff 0%, #6d3cff 100%);
+}
+.guardian-act-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.guardian-act-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.guardian-register-button {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.4);
+}
+.guardian-register-button:hover:not(:disabled) {
+  background: rgba(63, 185, 80, 0.25);
+}
+.guardian-register-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.guardian-divider {
+  border: none;
+  border-top: 1px solid #21262d;
+  margin: 16px 0;
+}
+
+/* ── Status box ── */
+.guardian-status-box {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  line-height: 1.5;
+  border: 1px solid;
+}
+
+.guardian-status-loading {
+  background: rgba(88, 166, 255, 0.08);
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.3);
+}
+
+.guardian-status-ok {
+  background: rgba(63, 185, 80, 0.08);
+  color: #3fb950;
+  border-color: rgba(63, 185, 80, 0.3);
+}
+
+.guardian-status-error {
+  background: rgba(248, 81, 73, 0.08);
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.3);
+}
+
+/* ── Timeline 时间线 ── */
+.guardian-timeline-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guardian-refresh-button {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.guardian-refresh-button:hover:not(:disabled) {
+  color: #58a6ff;
+  border-color: #58a6ff;
+}
+.guardian-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guardian-timeline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guardian-timeline-item {
+  padding: 10px 12px;
+  background: rgba(22, 27, 34, 0.6);
+  border: 1px solid #21262d;
+  border-left: 3px solid;
+  border-radius: 5px;
+}
+
+.guardian-timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.guardian-timeline-action {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.guardian-timeline-item.guardian-action-suspend .guardian-timeline-action {
+  background: rgba(255, 166, 87, 0.15);
+  color: #ffa657;
+}
+.guardian-timeline-item.guardian-action-suspend {
+  border-left-color: #ffa657;
+}
+.guardian-timeline-item.guardian-action-warn .guardian-timeline-action {
+  background: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+}
+.guardian-timeline-item.guardian-action-warn {
+  border-left-color: #d29922;
+}
+.guardian-timeline-item.guardian-action-expel .guardian-timeline-action {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+}
+.guardian-timeline-item.guardian-action-expel {
+  border-left-color: #f85149;
+}
+.guardian-timeline-item.guardian-action-restore .guardian-timeline-action {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+}
+.guardian-timeline-item.guardian-action-restore {
+  border-left-color: #3fb950;
+}
+
+.guardian-timeline-target {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.guardian-timeline-time {
+  margin-left: auto;
+  font-size: 10px;
+  color: #6e7681;
+  font-variant-numeric: tabular-nums;
+}
+
+.guardian-timeline-reason {
+  font-size: 12px;
+  color: #c9d1d9;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.guardian-timeline-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  color: #6e7681;
+}
+
+.guardian-timeline-status {
+  font-variant-numeric: tabular-nums;
+}
+
+.guardian-timeline-trail {
+  font-family: "JetBrains Mono", "Consolas", monospace;
+  color: #7c4dff;
+  opacity: 0.7;
+  cursor: help;
+}
+
+/* ── 近期滥用事件 ── */
+.guardian-abuse-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #21262d;
+}
+
+.guardian-abuse-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guardian-abuse-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: rgba(22, 27, 34, 0.4);
+  border-radius: 3px;
+  font-size: 11px;
+  border-left: 2px solid;
+}
+
+.guardian-abuse-item.guardian-action-suspend {
+  border-left-color: #ffa657;
+}
+.guardian-abuse-item.guardian-action-warn {
+  border-left-color: #d29922;
+}
+.guardian-abuse-item.guardian-action-expel {
+  border-left-color: #f85149;
+}
+
+.guardian-abuse-action {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
+
+.guardian-abuse-item.guardian-action-suspend .guardian-abuse-action {
+  color: #ffa657;
+}
+.guardian-abuse-item.guardian-action-warn .guardian-abuse-action {
+  color: #d29922;
+}
+.guardian-abuse-item.guardian-action-expel .guardian-abuse-action {
+  color: #f85149;
+}
+
+.guardian-abuse-target {
+  color: #c9d1d9;
+  font-weight: 500;
+}
+
+.guardian-abuse-time {
+  margin-left: auto;
+  color: #6e7681;
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+}
+
+/* ── Empty states ── */
+.guardian-empty {
+  padding: 24px;
+  text-align: center;
+  color: #6e7681;
+  font-size: 12px;
+}
+
+.guardian-empty-inline {
+  color: #6e7681;
+  font-size: 11px;
+}
+
+/* ── Scrollbar ── */
+.guardian-form-section::-webkit-scrollbar,
+.guardian-timeline-section::-webkit-scrollbar {
+  width: 6px;
+}
+.guardian-form-section::-webkit-scrollbar-track,
+.guardian-timeline-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+.guardian-form-section::-webkit-scrollbar-thumb,
+.guardian-timeline-section::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+.guardian-form-section::-webkit-scrollbar-thumb:hover,
+.guardian-timeline-section::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .guardian-panel-body {
+    grid-template-columns: 1fr;
+  }
+  .guardian-form-section {
+    border-right: none;
+    border-bottom: 1px solid #21262d;
+  }
+  .guardian-dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .guardian-action-bars {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

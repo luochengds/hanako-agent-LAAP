@@ -1,0 +1,43 @@
+# LAAP Lifeform 配置示例
+# 使用: python -m laap.lifeform.cli wake example-lifeform.yaml
+apiVersion: laap.io/v1
+kind: Lifeform
+metadata:
+  name: project-alpha-guardian
+  created: 2026-06-27
+spec:
+  name: "项目阿尔法守护者"
+  role: "architect"
+  sandboxId: "sb-alpha-001"
+  personality:
+    openness: 0.8
+    conscientiousness: 0.9
+    extraversion: 0.4
+    agreeableness: 0.6
+    neuroticism: 0.2
+  psiProfile:
+    baseNeeds:
+      - "certainty:0.6"
+      - "competence:0.8"
+      - "exploration:0.5"
+      - "affiliation:0.4"
+      - "self_growth:0.7"
+    riskAppetite: 0.3
+    cycleHz: 100
+  memory:
+    workingCapacity: 7
+    episodicRetention: 1000
+    consolidationInterval: 300
+  engines:
+    psi: true
+    qre: false
+    causal: true
+    worldModel: "local"
+    conscious: true
+    memory: true
+  governance:
+    humanOversight: "required_for_changes"
+    auditLevel: "full"
+  languageCortex:
+    provider: "deepseek"
+    model: "deepseek-chat"

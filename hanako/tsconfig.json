@@ -1,0 +1,40 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@hana/plugin-protocol": ["packages/plugin-protocol/src/index.ts"],
+      "@hana/plugin-sdk": ["packages/plugin-sdk/src/index.ts"],
+      "@hana/plugin-runtime": ["packages/plugin-runtime/src/index.ts"],
+      "@hana/plugin-components": ["packages/plugin-components/src/index.ts"],
+      "@/*": ["desktop/src/react/*"]
+    }
+  },
+  "include": [
+    "desktop/src/**/*.ts",
+    "desktop/src/**/*.tsx",
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "plugins/bubble-field/**/*.ts",
+    "plugins/bubble-field/**/*.tsx",
+    "plugins/birth-ceremony/**/*.ts",
+    "plugins/birth-ceremony/**/*.tsx",
+    "plugins/skill-packs/**/*.ts",
+    "plugins/skill-packs/**/*.tsx",
+    "plugins/hot-compile-preview/**/*.ts",
+    "plugins/hot-compile-preview/**/*.tsx",
+    "plugins/laaper-chat/**/*.ts",
+    "plugins/laaper-chat/**/*.tsx",
+    "plugins/trio-chatroom/**/*.ts",
+    "plugins/trio-chatroom/**/*.tsx",
+    "plugins/charter-guardian/**/*.ts",
+    "plugins/charter-guardian/**/*.tsx",
+    "plugins/laaper-market/**/*.ts",
+    "plugins/laaper-market/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "desktop/dist-renderer"
+  ]
+}

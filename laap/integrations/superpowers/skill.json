@@ -1,0 +1,28 @@
+{
+  "name": "superpowers",
+  "version": "2.0.0",
+  "description": "Superpowers dev methodology for LAAP",
+  "author": "obra → LAAP",
+  "skills": [
+    "brainstorming",
+    "writing-plans",
+    "test-driven-development",
+    "subagent-driven-development",
+    "executing-plans",
+    "requesting-code-review",
+    "receiving-code-review",
+    "systematic-debugging",
+    "verification-before-completion",
+    "using-git-worktrees",
+    "finishing-a-development-branch",
+    "dispatching-parallel-agents",
+    "writing-skills",
+    "using-superpowers"
+  ],
+  "hooks": [
+    "before_code",
+    "before_plan",
+    "during_test",
+    "while_debugging"
+  ]
+}

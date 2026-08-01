@@ -1,0 +1,37 @@
+name: Build macOS DMG
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'npm'
+          cache-dependency-path: hanako/package-lock.json
+
+      - name: Install Hanako dependencies
+        working-directory: ./hanako
+        run: npm install
+
+      - name: Build macOS DMG
+        working-directory: ./hanako
+        run: npm run dist
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hanako-macos-dmg
+          path: hanako/dist/
+          if-no-files-found: warn

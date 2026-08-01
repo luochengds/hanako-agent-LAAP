@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "laap"
+dynamic = ["version"]
+description = "Living Computation Paradigm / 生命计算范式 — PSI 认知架构数字生命体"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "cryptography>=41.0",
+    "docker>=6.0",
+]
+authors = [
+    { name = "Lorry & Aris", email = "lorry@laap.ai" },
+]
+keywords = ["cognitive-architecture", "digital-life", "AI", "PSI", "actors", "petri-nets"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/laap"
+Documentation = "https://laap.ai/docs"
+Repository = "https://github.com/your-org/laap"
+
+[project.optional-dependencies]
+# ── SDK — 轻量客户端挂载 ─────────────────────────────────────────
+sdk = []
+# ── 完整框架 ──────────────────────────────────────────────────────
+full = [
+    "aiohttp>=3.9",
+    "numpy>=1.24",
+    "rich>=13.0",
+]
+# ── 分布式 ────────────────────────────────────────────────────────
+distributed = [
+    "aiohttp>=3.9",
+]
+# ── 液态神经网络 (LNN) 认知动力学内核 ──────────────────────────────
+# 运行时仅依赖 numpy（LAAP 哲学：最小依赖）。torch 仅训练时可选，不在运行时依赖中。
+liquid = [
+    "numpy>=1.24",
+]
+# ── 开发 ──────────────────────────────────────────────────────────
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.1",
+    "mypy>=1.5",
+    "ruff>=0.1",
+    "pre-commit>=3.5",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "laap.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["laap*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+laap = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "distributed: marks tests that require network (deselect with '-m \"not distributed\"')",
+    "benchmark: marks tests as performance benchmarks (skipped if metric does not meet target)",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+disallow_untyped_defs = false
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP", "S", "BLE"]
+ignore = ["S101", "S301", "S311"]
+
+[tool.coverage.run]
+source = ["laap"]
+omit = ["*/tests/*", "laap/sdk/adapters/*"]
+fail_under = 70

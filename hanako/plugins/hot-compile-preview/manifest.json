@@ -1,0 +1,27 @@
+{
+  "id": "hot-compile-preview",
+  "name": "Hot Compile Preview",
+  "version": "0.1.0",
+  "description": "组件热编译预览：修改源码 → 沙箱 iframe 隔离渲染预览 → 行级 diff → 用户确认 → 热替换（不重启 Hanako）。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read", "resource.write"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "hotCompileSidecarEndpoint": {
+          "type": "string",
+          "title": "热编译预览 sidecar 端点基址",
+          "default": "http://127.0.0.1:11521"
+        },
+        "hotCompileAllowedRoots": {
+          "type": "array",
+          "items": { "type": "string" },
+          "title": "允许热替换的根目录（相对仓库根），其余路径拒绝",
+          "default": ["laap/", "hanako/plugins/"]
+        }
+      }
+    }
+  }
+}

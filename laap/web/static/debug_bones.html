@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>VRM Bone Debug</title>
+<style>
+body{background:#111;color:#0f0;font:13px monospace;margin:20px}
+button{background:#333;color:#fff;border:1px solid #555;padding:5px 10px;margin:2px;cursor:pointer;border-radius:3px}
+button:hover{background:#555}
+#log{background:#000;padding:10px;border-radius:5px;max-height:500px;overflow:auto;margin-top:10px;font-size:11px}
+#status{color:#0f0;margin:10px 0}
+.info{color:#888}
+.found{color:#0f0}
+.missing{color:#f00}
+</style>
+</head>
+<body>
+<h2>VRM Bone Debug Tool</h2>
+<div id="status">Loading VRM...</div>
+<div id="controls">
+  <button onclick="testBone('head','ry',0.5)">Head Left</button>
+  <button onclick="testBone('head','ry',-0.5)">Head Right</button>
+  <button onclick="testBone('head','rx',-0.3)">Head Up</button>
+  <button onclick="testBone('head','rx',0.3)">Head Down</button>
+  <button onclick="testBone('head','rz',0.3)">Head Tilt</button>
+  <button onclick="testBone('chest','ry',0.2)">Chest Left</button>
+  <button onclick="testBone('spine','rx',0.1)">Spine Bend</button>
+  <button onclick="resetBones()">Reset All</button>
+  <hr>
+  <button onclick="testBlink()">Blink</button>
+  <button onclick="testExpression('happy',1)">😊 Happy</button>
+  <button onclick="testExpression('sad',1)">😢 Sad</button>
+  <button onclick="testExpression('angry',1)">😠 Angry</button>
+  <button onclick="testExpression('surprised',1)">😲 Surprised</button>
+  <button onclick="testExpression('a',1)">Mouth A</button>
+  <button onclick="testExpression('i',1)">Mouth I</button>
+  <button onclick="testExpression('u',1)">Mouth U</button>
+  <hr>
+  <button onclick="playMotion('idle_gentle')">Idle Gentle</button>
+  <button onclick="playMotion('emote_joy')">Joy</button>
+  <button onclick="playMotion('emote_sad')">Sad</button>
+  <button onclick="playMotion('gesture_wave')">Wave</button>
+</div>
+<div id="log"></div>
+
+<script type="importmap">{
+  "imports":{
+    "three":"https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/",
+    "@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js"
+  }
+}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
+
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x222);
+const cam=new THREE.PerspectiveCamera(30,window.innerWidth/2,0.1,50);
+cam.position.set(0,1.2,3);
+const ren=new THREE.WebGLRenderer({antialias:true});
+ren.setSize(window.innerWidth/2,window.innerHeight);
+document.body.prepend(ren.domElement);
+const ctrl=new OrbitControls(cam,ren.domElement);
+ctrl.target.set(0,1.2,0); ctrl.update();
+scene.add(new THREE.AmbientLight(0x404060,0.8));
+scene.add(new THREE.DirectionalLight(0xffeedd,2).position.set(1,2,2));
+
+let avatar=null, logEl=document.getElementById('log');
+function log(msg,cls='info'){logEl.innerHTML+=`<div class="${cls}">${msg}</div>`;logEl.scrollTop=logEl.scrollHeight;}
+
+async function loadVRM(){
+  try{
+    const loader=new GLTFLoader(); loader.register(p=>new VRMLoaderPlugin(p));
+    const gltf=await loader.loadAsync('/models/model.vrm');
+    avatar=gltf.userData.vrm; if(!avatar)throw Error('No VRM');
+    scene.add(avatar.scene); avatar.scene.rotation.y=Math.PI;
+    document.getElementById('status').textContent='✅ VRM Loaded!';
+    log('VRM Model Loaded','found');
+    
+    // Test all bones
+    const boneNames=['head','neck','chest','spine','upperChest','hips',
+      'leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm',
+      'leftHand','rightHand','leftShoulder','rightShoulder'];
+    let found=0;
+    for(const bn of boneNames){
+      const node=avatar.humanoid?.getBoneNode(bn);
+      const exists=!!node;
+      if(exists)found++;
+      log(`  ${bn}: ${exists?'✅':'❌'} (${node?node.name:'N/A'})`,exists?'found':'missing');
+    }
+    log(`Total: ${found}/${boneNames.length} bones accessible`,'found');
+    
+    // Check expressions
+    const em=avatar.expressionManager;
+    if(em){
+      const names=['happy','sad','angry','surprised','relaxed','neutral','blink','a','i','u'];
+      log('Expressions:','found');
+      for(const n of names){
+        try{em.setValue(n,0);log(`  ${n}: ✅`,'found');}catch(e){log(`  ${n}: ❌ ${e.message}`,'missing');}
+      }
+    }
+  }catch(e){log('Load Error: '+e.message,'missing');}
+}
+loadVRM();
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(avatar&&avatar.update)avatar.update(0.016);
+  ctrl.update(); ren.render(scene,cam);
+}
+animate();
+
+// Expose to window for button access
+window.testBone=function(name,axis,value){
+  if(!avatar?.humanoid){log('No VRM loaded','missing');return;}
+  const node=avatar.humanoid.getBoneNode(name);
+  if(!node){log(`Bone '${name}' not found`,'missing');return;}
+  node.rotation[axis]=value;
+  log(`Set ${name}.${axis}=${value.toFixed(3)} (${(value*180/Math.PI).toFixed(1)}°)`,'found');
+};
+
+window.resetBones=function(){
+  if(!avatar?.humanoid)return;
+  for(const n of ['head','neck','chest','spine','upperChest','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm']){
+    const node=avatar.humanoid.getBoneNode(n);
+    if(node){node.rotation.set(0,0,0);}
+  }
+  log('All bones reset','info');
+};
+
+window.testBlink=function(){
+  if(!avatar)return;
+  const em=avatar.expressionManager;
+  if(em){em.setValue('blink',1);setTimeout(()=>em.setValue('blink',0),200);}
+  log('Blink','info');
+};
+
+window.testExpression=function(name,val){
+  if(!avatar)return;
+  const em=avatar.expressionManager;
+  if(em){
+    // Reset all
+    ['happy','sad','angry','surprised','relaxed','neutral','blink','a','i','u'].forEach(n=>em.setValue(n,0));
+    em.setValue(name,val);
+    log(`Expression ${name}=${val}`,'found');
+  } else log('No expression manager','missing');
+};
+
+// Load motion presets
+let motionPresets=null;
+window.playMotion=async function(name){
+  if(!motionPresets){
+    const r=await fetch('/motions/motion_presets.json');
+    motionPresets=await r.json();
+  }
+  const m=motionPresets.motions[name];
+  if(!m){log(`Motion '${name}' not found`,'missing');return;}
+  log(`Playing: ${m.name||name}`,'found');
+  if(m.bones){
+    Object.entries(m.bones).forEach(([bone,kfs])=>{
+      const node=avatar?.humanoid?.getBoneNode(bone);
+      if(!node){log(`  ${bone}: bone not found, skipping`,'missing');return;}
+      // Apply last keyframe
+      const last=kfs[kfs.length-1];
+      if(last.ry!==undefined)node.rotation.y=last.ry*3;
+      if(last.rx!==undefined)node.rotation.x=last.rx*3;
+      if(last.rz!==undefined)node.rotation.z=last.rz*3;
+      const r=node.rotation;
+      log(`  ${bone}: ry=${r.y.toFixed(3)} rx=${r.x.toFixed(3)} rz=${r.z.toFixed(3)}`,'found');
+    });
+  }
+};
+
+console.log('Bone debug tool ready');
+</script>
+</body>
+</html>

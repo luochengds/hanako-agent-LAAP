@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>LAAP VRM Test</title>
+<style>body{margin:0;overflow:hidden;background:#000}#info{position:absolute;top:10px;left:10px;color:#0f0;font:12px monospace;z-index:9}</style>
+</head>
+<body>
+<div id="info">Loading...</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/",
+    "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
+
+const info = document.getElementById('info');
+let errorMsg = '';
+
+window.addEventListener('error', e => { info.textContent = 'ERR: '+e.message; console.error(e); });
+window.addEventListener('unhandledrejection', e => { info.textContent = 'PROM: '+e.reason?.message; });
+
+try {
+  // Scene
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x222233);
+  const cam = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight, 0.1, 50);
+  cam.position.set(0, 1.2, 3);
+  const ren = new THREE.WebGLRenderer({antialias:true});
+  ren.setSize(window.innerWidth, window.innerHeight);
+  ren.setPixelRatio(1);
+  document.body.appendChild(ren.domElement);
+  const ctrl = new OrbitControls(cam, ren.domElement);
+  ctrl.target.set(0,1.2,0); ctrl.update();
+  scene.add(new THREE.AmbientLight(0x404060,0.8));
+  scene.add(new THREE.DirectionalLight(0xffeedd,2).position.set(1,2,2));
+  
+  info.textContent = 'Loading VRM...';
+  
+  // Load VRM
+  const loader = new GLTFLoader();
+  loader.register(p => new VRMLoaderPlugin(p));
+  
+  loader.loadAsync('/models/model.vrm').then(gltf => {
+    const vrm = gltf.userData.vrm;
+    if (!vrm) throw new Error('No VRM data');
+    scene.add(vrm.scene);
+    vrm.scene.rotation.y = Math.PI;
+    info.textContent = 'VRM loaded! Moving bones? ';
+    
+    // TEST: Access bones
+    const hm = vrm.humanoid;
+    info.textContent += 'hm='+(hm?'YES':'NO');
+    
+    if (hm) {
+      const head = hm.getBoneNode('head');
+      info.textContent += ' head='+(head?'YES':'NO');
+      
+      const chest = hm.getBoneNode('chest');
+      info.textContent += ' chest='+(chest?'YES':'NO');
+      
+      const spine = hm.getBoneNode('spine');
+      info.textContent += ' spine='+(spine?'YES':'NO');
+      
+      // Try to move them
+      if (head) {
+        info.textContent += ' Moving head...';
+        setTimeout(() => { head.rotation.y = 0.5; }, 1000);
+      }
+    }
+    
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      if (vrm && vrm.update) vrm.update(0.016);
+      ctrl.update();
+      ren.render(scene, cam);
+    }
+    animate();
+  }).catch(e => {
+    info.textContent = 'Load error: '+e.message;
+    console.error(e);
+  });
+} catch(e) {
+  info.textContent = 'Init error: '+e.message;
+  console.error(e);
+}
+</script>
+</body>
+</html>

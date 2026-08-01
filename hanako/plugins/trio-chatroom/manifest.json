@@ -1,0 +1,21 @@
+{
+  "id": "trio-chatroom",
+  "name": "Trio Chatroom",
+  "version": "0.1.0",
+  "description": "LAAPer 三人聊天室 overlay：话题组织 + 共识检测（分歧可视化）+ 共振记录沉淀为见证迹。消息经 P3 identity-pki Ed25519 签名 + P3 p2p-relay 信道投递，共识达成后写入 witness_trail_local 表。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read", "resource.write", "network.local"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "trioChatroomSidecarEndpoint": {
+          "type": "string",
+          "title": "三人聊天室 sidecar 端点基址",
+          "default": "http://127.0.0.1:11521"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "charter-guardian",
+  "name": "Charter Guardian",
+  "version": "0.1.0",
+  "description": "LAAP 宪章守护者治理面板 overlay：守护权力行使记录（不可篡改见证迹）+ 社区健康仪表盘（在线/暂停/封禁数、近期滥用事件、共识达成率）。守护者公钥白名单 + 4 种 action（suspend/warn/expel/restore），每次行使经 P4-witness-trail 链式 hash 沉淀。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read", "resource.write", "network.local"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "charterGuardianSidecarEndpoint": {
+          "type": "string",
+          "title": "宪章守护者 sidecar 端点基址",
+          "default": "http://127.0.0.1:11521"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "laaper-chat",
+  "name": "LAAPer Chat",
+  "version": "0.1.0",
+  "description": "LAAPer 间 1v1 跨实例对话面板：消息气泡 + 认知状态侧栏 + 认知足迹展开。消息经 P3 identity-pki Ed25519 签名 + P3 p2p-relay 信道投递。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read", "resource.write", "network.local"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "laaperChatSidecarEndpoint": {
+          "type": "string",
+          "title": "1v1 对话 sidecar 端点基址",
+          "default": "http://127.0.0.1:11521"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "birth-ceremony",
+  "name": "Birth Ceremony",
+  "version": "0.1.0",
+  "description": "LAAPer 诞生仪式向导：命名 → 形象 → 性格 → 宪章签署 → 公钥生成。完成后新 LAAPer 注册到社区身份体系并出现在 bubble-field。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read", "resource.write"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "ceremonyAutoTriggerOnFirstLaunch": {
+          "type": "boolean",
+          "title": "首次启动无 LAAPer 身份时自动触发诞生仪式",
+          "default": true
+        },
+        "ceremonySidecarEndpoint": {
+          "type": "string",
+          "title": "诞生仪式 sidecar 端点基址",
+          "default": "http://127.0.0.1:11521"
+        },
+        "ceremonyRequireCharterSign": {
+          "type": "boolean",
+          "title": "要求勾选全部八条宪章才允许签署",
+          "default": true
+        }
+      }
+    }
+  }
+}

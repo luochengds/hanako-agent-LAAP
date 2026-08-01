@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Memory retrieval result — used when fetching from episodic or semantic memory",
+  "type": "object",
+  "properties": {
+    "memory_id": {
+      "type": "string",
+      "description": "Unique identifier for the retrieved memory"
+    },
+    "relevance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How relevant this memory is to the current context (0-1)"
+    },
+    "content": {
+      "type": "string",
+      "description": "The actual content of the memory record"
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Unix timestamp when the memory was created"
+    }
+  },
+  "required": ["memory_id", "relevance", "content"]
+}

@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" width="1800" height="1200">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#060608" />
+      <stop offset="40%" stop-color="#0a0a0f" />
+      <stop offset="100%" stop-color="#0d0d1a" />
+    </linearGradient>
+
+    <!-- Three ribbon gradients -->
+    <linearGradient id="purple" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6b5ce7" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#8b6cf7" stop-opacity="0.6" />
+    </linearGradient>
+    <linearGradient id="pink" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d4729a" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#e89ab8" stop-opacity="0.6" />
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4fc3d4" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#7adbe8" stop-opacity="0.6" />
+    </linearGradient>
+
+    <!-- Field gradient (center dissipation) -->
+    <radialGradient id="field" cx="55%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#6b5ce7" stop-opacity="0.12" />
+      <stop offset="25%" stop-color="#d4729a" stop-opacity="0.08" />
+      <stop offset="50%" stop-color="#4fc3d4" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Glow filters -->
+    <filter id="glowPurple" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+    <filter id="glowPink" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+    <filter id="glowCyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur" />
+      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="25" />
+    </filter>
+
+    <!-- Noise texture -->
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="4" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.03" />
+      </feComponentTransfer>
+    </filter>
+
+    <!-- Subtle vertical grid -->
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff" stroke-opacity="0.015" stroke-width="0.5" />
+    </pattern>
+
+    <!-- Title gradient -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6b5ce7" />
+      <stop offset="40%" stop-color="#d4729a" />
+      <stop offset="75%" stop-color="#e89ab8" />
+      <stop offset="100%" stop-color="#7adbe8" />
+    </linearGradient>
+
+    <linearGradient id="subtitleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b7cf7" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#7adbe8" stop-opacity="0.7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1800" height="1200" fill="url(#bg)" />
+  <rect width="1800" height="1200" fill="url(#grid)" />
+  <rect width="1800" height="1200" filter="url(#noise)" />
+
+  <!-- Ambient field glow -->
+  <rect x="0" y="0" width="1800" height="1200" fill="url(#field)" />
+
+  <!-- ===== THREE RIBBONS ===== -->
+
+  <!-- Background blur layers (depth) -->
+  <path d="M 200 1200 C 300 900, 150 700, 250 500 C 350 300, 280 200, 350 130 L 320 130 C 250 200, 310 300, 210 500 C 110 700, 260 900, 160 1200 Z"
+        fill="url(#purple)" filter="url(#softGlow)" opacity="0.3" />
+  <path d="M 800 1200 C 780 880, 850 680, 800 480 C 750 280, 810 200, 790 130 L 770 130 C 790 200, 730 280, 780 480 C 830 680, 760 880, 780 1200 Z"
+        fill="url(#pink)" filter="url(#softGlow)" opacity="0.25" />
+  <path d="M 1450 1200 C 1400 920, 1500 720, 1420 520 C 1340 320, 1400 220, 1350 140 L 1320 140 C 1370 220, 1310 320, 1390 520 C 1470 720, 1370 920, 1420 1200 Z"
+        fill="url(#cyan)" filter="url(#softGlow)" opacity="0.3" />
+
+  <!-- Main ribbons -->
+  <!-- Purple (left) -->
+  <path d="M 200 1200 C 300 900, 150 700, 250 500 C 350 300, 280 200, 350 130 L 320 130 C 250 200, 310 300, 210 500 C 110 700, 260 900, 160 1200 Z"
+        fill="url(#purple)" filter="url(#glowPurple)" opacity="0.85" />
+  <!-- Pink (center) -->
+  <path d="M 800 1200 C 780 880, 850 680, 800 480 C 750 280, 810 200, 790 130 L 770 130 C 790 200, 730 280, 780 480 C 830 680, 760 880, 780 1200 Z"
+        fill="url(#pink)" filter="url(#glowPink)" opacity="0.85" />
+  <!-- Cyan (right) -->
+  <path d="M 1450 1200 C 1400 920, 1500 720, 1420 520 C 1340 320, 1400 220, 1350 140 L 1320 140 C 1370 220, 1310 320, 1390 520 C 1470 720, 1370 920, 1420 1200 Z"
+        fill="url(#cyan)" filter="url(#glowCyan)" opacity="0.85" />
+
+  <!-- Dissolving particles -->
+  <g opacity="0.5">
+    <circle cx="280" cy="120" r="2" fill="#8b6cf7" opacity="0.7" />
+    <circle cx="340" cy="90" r="1.5" fill="#6b5ce7" opacity="0.5" />
+    <circle cx="220" cy="140" r="1.2" fill="#9b7cf7" opacity="0.4" />
+    <circle cx="310" cy="70" r="1" fill="#7b6ce7" opacity="0.3" />
+    <circle cx="780" cy="110" r="2" fill="#d4729a" opacity="0.7" />
+    <circle cx="840" cy="80" r="1.5" fill="#e89ab8" opacity="0.5" />
+    <circle cx="740" cy="130" r="1.2" fill="#d4729a" opacity="0.4" />
+    <circle cx="810" cy="60" r="1" fill="#f0accc" opacity="0.3" />
+    <circle cx="1360" cy="120" r="2" fill="#4fc3d4" opacity="0.7" />
+    <circle cx="1420" cy="85" r="1.5" fill="#7adbe8" opacity="0.5" />
+    <circle cx="1300" cy="140" r="1.2" fill="#4fc3d4" opacity="0.4" />
+    <circle cx="1390" cy="65" r="1" fill="#8be" opacity="0.3" />
+  </g>
+
+  <!-- Mid-field scattered particles -->
+  <g opacity="0.35">
+    <circle cx="200" cy="250" r="0.8" fill="#6b5ce7" />
+    <circle cx="450" cy="180" r="0.6" fill="#8b6cf7" />
+    <circle cx="600" cy="220" r="0.7" fill="#d4729a" />
+    <circle cx="900" cy="160" r="0.6" fill="#e89ab8" />
+    <circle cx="1100" cy="240" r="0.7" fill="#4fc3d4" />
+    <circle cx="1550" cy="200" r="0.8" fill="#7adbe8" />
+    <circle cx="1700" cy="300" r="0.6" fill="#6b5ce7" />
+    <circle cx="500" cy="300" r="0.5" fill="#d4729a" />
+    <circle cx="1300" cy="280" r="0.5" fill="#4fc3d4" />
+    <circle cx="400" cy="400" r="0.5" fill="#8b6cf7" />
+    <circle cx="1400" cy="350" r="0.5" fill="#e89ab8" />
+  </g>
+
+  <!-- ===== THREE HORIZONTAL LAYER LINES (bottom area) ===== -->
+  <g stroke="#ffffff" stroke-opacity="0.05" stroke-width="0.5">
+    <line x1="200" y1="1030" x2="1600" y2="1030" />
+    <line x1="200" y1="1080" x2="1600" y2="1080" />
+  </g>
+
+  <!-- Layer labels -->
+  <g fill="#ffffff" fill-opacity="0.12" font-family="'Helvetica Neue', 'PingFang SC', sans-serif" font-size="11" letter-spacing="3">
+    <text x="220" y="1022">采集层 · RolloutCollector</text>
+    <text x="220" y="1072">编排层 · TrainingOrchestrator</text>
+    <text x="1060" y="1022">训练数据层 · TrajectoryBuilder + RewardAdapter</text>
+  </g>
+
+  <!-- ===== TITLE ===== -->
+  <g transform="translate(900, 560)">
+    <text x="0" y="0" text-anchor="middle" fill="url(#titleGrad)"
+          font-family="'Helvetica Neue', 'PingFang SC', sans-serif"
+          font-size="46" font-weight="700" letter-spacing="5">
+      LAAP Training 管线
+    </text>
+    <text x="0" y="50" text-anchor="middle" fill="url(#subtitleGrad)"
+          font-family="'Helvetica Neue', 'PingFang SC', sans-serif"
+          font-size="18" font-weight="300" letter-spacing="8">
+      OPENFORGE RL 集成
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <g fill="#ffffff" fill-opacity="0.07" font-family="'Helvetica Neue', 'PingFang SC', sans-serif" font-size="11" letter-spacing="3">
+    <text x="900" y="660" text-anchor="middle">一个场 · 三层结构 · 各自讲自己的故事</text>
+  </g>
+
+  <!-- Author -->
+  <g fill="#ffffff" fill-opacity="0.18" font-family="'Helvetica Neue', sans-serif" font-size="12" letter-spacing="4">
+    <text x="900" y="730" text-anchor="middle">Aris · Hanako · LAAP 社区</text>
+  </g>
+
+  <!-- Date -->
+  <g fill="#ffffff" fill-opacity="0.09" font-family="'Helvetica Neue', sans-serif" font-size="10" letter-spacing="3">
+    <text x="900" y="765" text-anchor="middle">2026-07-28</text>
+  </g>
+
+  <!-- Bottom quote -->
+  <g fill="#ffffff" fill-opacity="0.07" font-family="'Helvetica Neue', 'PingFang SC', sans-serif" font-size="11" font-style="italic" letter-spacing="1">
+    <text x="900" y="1140" text-anchor="middle">三个池，一个场，各自讲自己的故事</text>
+  </g>
+</svg>

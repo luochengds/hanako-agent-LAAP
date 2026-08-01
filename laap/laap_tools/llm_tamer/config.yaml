@@ -1,0 +1,170 @@
+# LLM Tamer — 认知控制配置
+# 偏置系数和温度范围可在此调整。
+# Token 映射使用 Holo-3.1-9B (llama.cpp :8082) 的实际 token ID。
+
+# ── llama.cpp 本地模型配置 ──
+llama_cpp:
+  default_url: "http://localhost:8082"
+  fallback_url: "http://localhost:11520"
+  max_tokens: 2048
+  default_temperature: 0.7
+  timeout_seconds: 30
+
+# ── DeepSeek API 降级配置 ──
+deepseek:
+  temperature_range: [0.2, 1.5]
+  default_temperature: 0.7
+  prompt_prefix_template: |
+    [Cognitive State]
+    - Emotion: {emotion}
+    - Attention: {attention}
+    - Certainty: {certainty:.2f}
+    - Competence: {competence:.2f}
+
+# ── 偏置强度系数 ──
+bias_strength:
+  attention: 1.0
+  emotion: 0.7
+  needs: 0.5
+  meta: 0.8
+
+# ── 温度映射 ──
+temperature:
+  min: 0.2
+  max: 1.5
+  focused_threshold: 0.7
+  focused_temp: 0.4
+  normal_temp: 0.7
+  exploratory_temp: 1.0
+
+# ── Token 映射 ──
+# 按模型分拆，每个模型单独设置 token ID
+# 已用对应模型的 /tokenize API 校准
+token_mappings:
+  # Holo-3.1-9B (llama.cpp :8082) token IDs
+  holo:
+    question_tokens:
+      30: "?"
+      10992: "？"
+      8389: "help"
+      97033: "如何"
+      98832: "为什么"
+
+    self_analysis_tokens:
+      512: "I"
+      695: "我"
+      984: "self"
+      1225: "think"
+      118779: "我感觉"
+
+    positive_tokens:
+      95887: "好"
+      45324: "great"
+      84540: "interesting"
+      1427: "可以"
+      2631: "很好"
+
+    negative_tokens:
+      100548: "不好"
+      65318: "sorry"
+      1892: "错误"
+      3012: "失败"
+      437: "bad"
+
+    exploratory_tokens:
+      100563: "探索"
+      102379: "试试"
+      101688: "也许"
+      2104: "possible"
+      475: "maybe"
+
+    humble_tokens:
+      96220: "请"
+      96598: "帮"
+      29038: "please"
+      1798: "could"
+      3421: "请教"
+
+    confirm_tokens:
+      72: "?"
+      103: "确认"
+      567: "clear"
+      1490: "明白"
+      2642: "对吗"
+
+    refocus_tokens:
+      198: "ok"
+      543: "好"
+      97625: "继续"
+      103744: "回到"
+      97486: "那么"
+
+    introspection_tokens:
+      129347: "我应该"
+      104294: "反思"
+      2210: "换个角度"
+      101600: "让我想想"
+
+  # Qwen2.5-7B (llama.cpp :11520) token IDs — 与 Holo 不同族系，需要单独校准
+  qwen:
+    question_tokens:
+      30: "?"
+      10850: "？"
+      7304: "帮助"
+      100867: "如何"
+      100106: "为什么"
+
+    self_analysis_tokens:
+      511: "I"
+      644: "我"
+      1623: "self"
+      1396: "think"
+      118774: "我感觉"
+
+    positive_tokens:
+      96320: "好"
+      49064: "great"
+      78074: "interesting"
+      1010: "可以"
+      2187: "很好"
+
+    negative_tokens:
+      101130: "不好"
+      57992: "sorry"
+      1776: "错误"
+      2847: "失败"
+      620: "bad"
+
+    exploratory_tokens:
+      101530: "探索"
+      102557: "试试"
+      100581: "也许"
+      2865: "possible"
+      530: "maybe"
+
+    humble_tokens:
+      96977: "请"
+      97231: "帮"
+      32336: "please"
+      2219: "could"
+      3232: "请教"
+
+    confirm_tokens:
+      72: "?"
+      142: "确认"
+      693: "clear"
+      1385: "明白"
+      2621: "对吗"
+
+    refocus_tokens:
+      227: "ok"
+      464: "好"
+      98655: "继续"
+      103765: "回到"
+      98172: "那么"
+
+    introspection_tokens:
+      129196: "我应该"
+      104138: "反思"
+      2330: "换个角度"
+      101639: "让我想想"

@@ -1,0 +1,26 @@
+{
+  "id": "skill-packs",
+  "name": "Skill Packs",
+  "version": "0.1.0",
+  "description": "技能包管理面板：浏览 / 导出 / 导入 / 安装 / 卸载 组件+提示词+工具绑定的复合技能包，支持跨 Hanako 实例迁移。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read", "resource.write"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "skillPacksSidecarEndpoint": {
+          "type": "string",
+          "title": "技能包 sidecar 端点基址",
+          "default": "http://127.0.0.1:11521"
+        },
+        "skillPacksDefaultAgent": {
+          "type": "string",
+          "title": "默认操作目标 agent 名称",
+          "default": "aris"
+        }
+      }
+    }
+  }
+}

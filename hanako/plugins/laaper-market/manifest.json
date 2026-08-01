@@ -1,0 +1,12 @@
+{
+  "id": "laaper-market",
+  "name": "LAAPer 市场",
+  "version": "1.0.0",
+  "description": "社区示例 LAAPer 预设包市场，一键克隆并自定义",
+  "main": "index.ts",
+  "contributes": {
+    "commands": [
+      { "command": "laaper-market.open", "title": "打开 LAAPer 市场" }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "bubble-field",
+  "name": "Bubble Field",
+  "version": "0.1.0",
+  "description": "LAAPer 意识海洋主界面：发光泡泡 + 力导向布局 + 共振连线，编码 LAAPer 身份与认知状态。",
+  "trust": "full-access",
+  "hidden": true,
+  "capabilities": ["resource.read"],
+  "activationEvents": ["onStartup"],
+  "contributes": {
+    "configuration": {
+      "properties": {
+        "bubbleFieldEnabled": {
+          "type": "boolean",
+          "title": "启用意识海洋面板",
+          "default": true
+        },
+        "bubbleFieldColor": {
+          "type": "string",
+          "title": "意识海洋背景色调",
+          "default": "#0a0e1a"
+        },
+        "bubbleFieldPollInterval": {
+          "type": "number",
+          "title": "在线状态轮询间隔（毫秒）",
+          "default": 5000
+        }
+      }
+    }
+  }
+}

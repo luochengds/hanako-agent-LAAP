@@ -1,0 +1,160 @@
+/**
+ * bubble-styles.css — Mineradio 风格
+ *
+ * 深色背景 + 发光泡泡 + 力导向布局
+ * 命名空间 bf- (bubble-field) 避免与全局样式冲突
+ */
+
+/* ── Overlay 全屏覆盖 ── */
+.bf-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: radial-gradient(ellipse at center, #0a0e1a 0%, #050709 100%);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/* ── 容器 ── */
+.bf-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(74, 158, 255, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255, 200, 87, 0.03) 0%, transparent 40%);
+}
+
+/* ── 共振连线 SVG 层 ── */
+.bf-resonance-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bf-resonance-line {
+  transition: stroke-opacity 0.3s ease;
+}
+
+/* ── 泡泡 ── */
+.bf-bubble {
+  border-radius: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: opacity 0.4s ease, box-shadow 0.4s ease;
+  will-change: transform, box-shadow;
+}
+
+.bf-bubble:hover {
+  z-index: 3;
+}
+
+/* 名称 + 状态徽章（默认隐藏，hover 时显示） */
+.bf-bubble-label {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(200, 210, 230, 0.7);
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.bf-bubble:hover .bf-bubble-label {
+  opacity: 1;
+}
+
+/* ── 光晕脉冲动画（思考中） ── */
+@keyframes bf-pulse {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.3);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* ── 悬停浮卡 ── */
+.bf-hover-card {
+  position: absolute;
+  z-index: 10;
+  background: rgba(10, 14, 26, 0.92);
+  border: 1px solid rgba(120, 140, 180, 0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 140px;
+  max-width: 240px;
+  font-size: 12px;
+  color: rgba(200, 210, 230, 0.85);
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.bf-hover-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.bf-hover-status {
+  color: rgba(180, 190, 210, 0.7);
+  margin-bottom: 2px;
+}
+
+.bf-hover-energy {
+  color: rgba(180, 190, 210, 0.6);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.bf-hover-caps {
+  color: rgba(150, 170, 200, 0.6);
+  font-size: 10px;
+  line-height: 1.4;
+  border-top: 1px solid rgba(120, 140, 180, 0.15);
+  padding-top: 4px;
+}
+
+/* ── 关闭按钮 ── */
+.bf-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(120, 140, 180, 0.3);
+  background: rgba(10, 14, 26, 0.6);
+  color: rgba(200, 210, 230, 0.7);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.bf-close-btn:hover {
+  background: rgba(30, 36, 50, 0.8);
+  color: rgba(220, 230, 250, 0.95);
+}

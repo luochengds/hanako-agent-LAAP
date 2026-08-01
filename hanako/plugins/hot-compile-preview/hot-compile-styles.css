@@ -1,0 +1,249 @@
+/**
+ * hot-compile-styles.css — Mineradio 风格
+ *
+ * 深色背景 + 简洁表单 + 发光强调色（参考 bubble-field / birth-ceremony）。
+ * 不使用 emoji，仅几何线条与色块。
+ */
+
+.hot-compile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  background: rgba(8, 10, 16, 0.92);
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  color: #e6ecf3;
+  backdrop-filter: blur(6px);
+}
+
+.hot-compile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(20, 24, 34, 0.6);
+}
+
+.hot-compile-title {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #d7e0ea;
+}
+
+.hot-compile-subtitle {
+  font-size: 12px;
+  color: #7a8699;
+  margin-left: 12px;
+}
+
+.hot-compile-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #b6c2d2;
+  padding: 4px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.hot-compile-close:hover {
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.hot-compile-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(180px, 38%);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  min-height: 0;
+}
+
+.hot-compile-pane {
+  background: #0c1018;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.hot-compile-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 11px;
+  color: #7a8699;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hot-compile-pane-path {
+  color: #4a9eff;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.hot-compile-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.hot-compile-editor textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  background: #0a0d14;
+  color: #d7e0ea;
+  padding: 12px 16px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+}
+
+.hot-compile-editor textarea:focus {
+  background: #0c1018;
+}
+
+.hot-compile-preview-frame {
+  flex: 1;
+  border: none;
+  background: #ffffff;
+  width: 100%;
+  min-height: 0;
+}
+
+.hot-compile-diff {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 0;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  background: #0a0d14;
+}
+
+.hot-compile-diff-line {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 16px;
+  white-space: pre;
+}
+
+.hot-compile-diff-line.added {
+  background: rgba(80, 200, 120, 0.10);
+  color: #7adfa0;
+}
+
+.hot-compile-diff-line.removed {
+  background: rgba(230, 100, 100, 0.10);
+  color: #f0a0a0;
+}
+
+.hot-compile-diff-line.unchanged {
+  color: #6b7689;
+}
+
+.hot-compile-diff-marker {
+  display: inline-block;
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.hot-compile-diff-content {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.hot-compile-empty {
+  padding: 24px 16px;
+  color: #5a6577;
+  font-size: 12px;
+  text-align: center;
+}
+
+.hot-compile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(20, 24, 34, 0.6);
+}
+
+.hot-compile-status {
+  font-size: 12px;
+  color: #7a8699;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+
+.hot-compile-status.error {
+  color: #f0a0a0;
+}
+
+.hot-compile-status.ok {
+  color: #7adfa0;
+}
+
+.hot-compile-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.hot-compile-btn {
+  padding: 6px 18px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #b6c2d2;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.hot-compile-btn:hover {
+  border-color: #4a9eff;
+  color: #4a9eff;
+}
+
+.hot-compile-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hot-compile-btn.primary {
+  background: #4a9eff;
+  border-color: #4a9eff;
+  color: #0a0d14;
+  font-weight: 500;
+}
+
+.hot-compile-btn.primary:hover:not(:disabled) {
+  background: #6cb0ff;
+  border-color: #6cb0ff;
+}
+
+.hot-compile-btn.primary:disabled {
+  background: #2a3142;
+  border-color: #2a3142;
+  color: #5a6577;
+}

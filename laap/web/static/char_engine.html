@@ -1,0 +1,128 @@
+
+<!-- ═══ Character Selector ═══ -->
+<div id="char-panel" style="position:absolute;top:40px;right:10px;z-index:20;display:none;background:#1A1A2E;border:1px solid #333;border-radius:10px;padding:12px;width:260px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,0.6)">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <span style="color:#FFD700;font-size:13px;font-weight:600">🎭 角色引擎</span>
+    <button id="char-close" style="background:none;border:none;color:#888;cursor:pointer;font-size:16px">✕</button>
+  </div>
+  <input id="char-search" placeholder="搜索角色名/性格/台词..." style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid #333;background:#0D0D1A;color:#C8C8C8;font-size:11px;outline:none;margin-bottom:8px">
+  <div id="char-results" style="font-size:11px;color:#888"></div>
+  <hr style="border-color:#222;margin:8px 0">
+  <div style="font-size:10px;color:#555;margin-bottom:4px">已加载角色:</div>
+  <div id="char-loaded-list"></div>
+  <hr style="border-color:#222;margin:8px 0">
+  <div style="font-size:10px;color:#555;margin-bottom:4px">自定义记忆:</div>
+  <textarea id="custom-memory-input" placeholder="输入新的角色记忆..." style="width:100%;padding:4px 6px;border-radius:4px;border:1px solid #333;background:#0D0D1A;color:#C8C8C8;font-size:10px;height:40px;outline:none;resize:vertical"></textarea>
+  <button id="add-memory-btn" style="margin-top:4px;padding:3px 10px;border-radius:4px;border:1px solid #FFD700;background:rgba(255,215,0,0.1);color:#FFD700;cursor:pointer;font-size:10px">+ 添加记忆</button>
+</div>
+
+<script>
+// ═══ Character Engine Frontend ═══
+let currentCharacter = null;
+let characterMemories = [];
+
+// Open/close character panel
+document.addEventListener('keydown', e => {
+  if (e.key === 'c' && e.ctrlKey) {
+    const panel = document.getElementById('char-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (panel.style.display === 'block') document.getElementById('char-search').focus();
+  }
+  if (e.key === 'Escape') document.getElementById('char-panel').style.display = 'none';
+});
+
+document.getElementById('char-close').onclick = () => {
+  document.getElementById('char-panel').style.display = 'none';
+};
+
+// Search characters
+let searchTimeout;
+document.getElementById('char-search').oninput = function() {
+  clearTimeout(searchTimeout);
+  const q = this.value.trim();
+  if (!q) { document.getElementById('char-results').innerHTML = ''; return; }
+  searchTimeout = setTimeout(() => {
+    fetch('/api/character/search?q=' + encodeURIComponent(q))
+      .then(r => r.json()).then(results => {
+        const el = document.getElementById('char-results');
+        if (results.length === 0) { el.innerHTML = '<div style="color:#666">未找到匹配角色</div>'; return; }
+        el.innerHTML = results.map(r => `
+          <div class="char-result" style="padding:6px 8px;border-radius:6px;cursor:pointer;margin:2px 0;background:rgba(255,255,255,0.03);border:1px solid transparent" 
+               onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='transparent'"
+               onclick="loadCharacter('${r.name}')">
+            <div style="font-weight:600;color:#C8C8C8;font-size:12px">${r.name}</div>
+            <div style="color:#666;font-size:9px">${r.source} · ${r.traits.join(' / ')}</div>
+            <div style="color:#555;font-size:9px;margin-top:2px">${r.summary.substring(0,80)}...</div>
+            <div style="color:#FFD700;font-size:8px;margin-top:2px">匹配度: ${(r.score*100).toFixed(0)}%</div>
+          </div>
+        `).join('');
+      }).catch(() => {});
+  }, 300);
+};
+
+window.loadCharacter = function(name) {
+  fetch('/api/character/load?name=' + encodeURIComponent(name))
+    .then(r => r.json()).then(data => {
+      if (data.error) { alert(data.error); return; }
+      currentCharacter = data;
+      document.getElementById('char-panel').style.display = 'none';
+      document.getElementById('char-search').value = '';
+      document.getElementById('char-results').innerHTML = '';
+      // Show loaded character
+      const list = document.getElementById('char-loaded-list');
+      list.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:rgba(255,215,0,0.08);border-radius:6px;border:1px solid rgba(255,215,0,0.15)">'
+        + '<span style="color:#FFD700;font-size:12px">🎭 ' + data.display_name + '</span>'
+        + '<button onclick="unloadCharacter()" style="background:none;border:none;color:#DC143C;cursor:pointer;font-size:12px">✕</button></div>';
+      // Send character info to server
+      if (window.ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({type:'command',cmd:'set_character',name:data.character_name}));
+      }
+      // Add system message
+      const msgDiv = document.getElementById('messages');
+      if (msgDiv) {
+        const el = document.createElement('div'); el.className = 'msg system';
+        el.textContent = '🎭 角色已加载: ' + data.display_name;
+        msgDiv.appendChild(el); msgDiv.scrollTop = msgDiv.scrollHeight;
+      }
+    }).catch(e => alert('Load failed: ' + e.message));
+};
+
+window.unloadCharacter = function() {
+  currentCharacter = null;
+  document.getElementById('char-loaded-list').innerHTML = '<div style="color:#555;font-size:10px">无</div>';
+  if (window.ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type:'command',cmd:'clear_character'}));
+  }
+};
+
+// Custom memory
+document.getElementById('add-memory-btn').onclick = function() {
+  const input = document.getElementById('custom-memory-input');
+  const text = input.value.trim();
+  if (!text) return;
+  fetch('/api/character/memory', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({character: currentCharacter?.character_name || 'default', content: text})
+  }).then(r => r.json()).then(() => {
+    input.value = '';
+    alert('✅ 记忆已添加');
+  });
+};
+
+// Add character button to corner
+document.addEventListener('DOMContentLoaded', () => {
+  const cornerBtns = document.querySelector('.corner-btns') || document.querySelector('#emotion-display')?.parentElement;
+  if (cornerBtns) {
+    const btn = document.createElement('button');
+    btn.textContent = '🎭';
+    btn.title = '角色引擎 (Ctrl+C)';
+    btn.style.cssText = 'background:rgba(0,0,0,0.6);border:1px solid #333;color:#aaa;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px';
+    btn.onclick = () => {
+      const panel = document.getElementById('char-panel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    };
+    cornerBtns.appendChild(btn);
+  }
+});
+</script>

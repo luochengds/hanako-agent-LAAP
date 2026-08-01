@@ -1,0 +1,148 @@
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Editors / IDEs ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+*.orig
+
+# === Logs ===
+*.log
+logs/
+log/
+
+# === Node.js / Electron ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json?
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+dist-*/
+build/
+out/
+release/
+.cache/
+.webpack/
+.vite/
+*.tsbuildinfo
+
+# Electron / Electron-builder
+*.dmg
+*.exe
+*.zip
+*.tar.gz
+*.AppImage
+*.deb
+*.rpm
+*.nsis
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.egg
+*.egg-info/
+.eggs/
+*.whl
+.Python
+*.manifest
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# mypy / ruff
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# === Rust ===
+target/
+Cargo.lock
+
+# === Data / Runtime ===
+.env
+.env.*
+!.env.example
+
+# Credential / state files
+auth.json
+device-credentials.json
+users.json
+pairing-sessions.json
+server-info.json
+server-network.json
+server-node.json
+usage-ledger.json
+provider-catalog.json
+models-cache.json
+models.json
+data-epoch.json
+identity_registry.json
+sign-key*.json
+
+# LAAP runtime
+memory_vault/
+state/
+aris-sidecar.lock
+aris-sidecar.token
+*.db
+_tmp_*/
+
+# === Experimental / not for release ===
+aris_brain/
+LAAP-Mobile/
+OmniRoute-release-*/
+sharp_env/
+models/
+harness/
+rust_core/
+laap-client/
+laap-netlify/
+.codegraph/
+artifacts/
+external/
+.laap-build-output/
+godot/
+agents/
+ui-main/
+openminis/
+HarnessX-main/
+媒体发布写作/
+self_model_bridge/
+test-venv/
+
+# === Misc ===
+*.tmp
+*.temp
+*.lock

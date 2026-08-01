@@ -1,0 +1,10 @@
+# LAAP — Lifeform Autonomous Adaptive Protocol
+# 自进化引擎意识生命体
+#
+# 依赖清单统一由 pyproject.toml 管理（含 laap_brain 认知内核）。
+# 安装本包及其全部主依赖：
+#   pip install -r requirements.txt
+# 或安装可选扩展：
+#   pip install -e ".[all]"
+
+-e .

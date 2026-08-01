@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Action plan — structured sequence of steps for execution",
+  "type": "object",
+  "properties": {
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "The action to take"
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this action is necessary"
+          },
+          "expected_outcome": {
+            "type": "string",
+            "description": "What is expected to happen"
+          }
+        },
+        "required": ["action", "rationale"]
+      },
+      "minItems": 1,
+      "description": "Ordered list of steps to execute"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "Overall priority of this plan"
+    },
+    "estimated_time": {
+      "type": "string",
+      "description": "Human-readable estimated duration"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Prerequisites or dependencies"
+    }
+  },
+  "required": ["steps", "priority"]
+}

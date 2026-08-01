@@ -1,0 +1,370 @@
+/**
+ * skill-packs-styles.css — Mineradio 风格
+ *
+ * 深色背景 + 卡片网格 + 强调色按钮
+ * 命名空间 sp- (skill-packs) 避免与全局样式冲突
+ */
+
+/* ── Overlay 全屏覆盖 ── */
+.sp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: radial-gradient(ellipse at center, #0a0e1a 0%, #050709 100%);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 40px 32px;
+  overflow: auto;
+}
+
+/* ── 主面板 ── */
+.sp-panel {
+  width: 100%;
+  max-width: 1100px;
+  background: rgba(10, 14, 26, 0.7);
+  border: 1px solid rgba(120, 140, 180, 0.18);
+  border-radius: 12px;
+  padding: 28px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ── 头部 ── */
+.sp-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(120, 140, 180, 0.15);
+}
+
+.sp-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(220, 230, 250, 0.95);
+  letter-spacing: 0.5px;
+}
+
+.sp-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(180, 190, 210, 0.7);
+  margin-left: auto;
+}
+
+.sp-agent-name {
+  color: rgba(120, 200, 255, 0.9);
+  font-weight: 600;
+}
+
+.sp-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(120, 140, 180, 0.3);
+  background: rgba(10, 14, 26, 0.6);
+  color: rgba(200, 210, 230, 0.7);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sp-close-btn:hover {
+  background: rgba(30, 36, 50, 0.8);
+  color: rgba(220, 230, 250, 0.95);
+}
+
+/* ── 工具栏 ── */
+.sp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.sp-input {
+  flex: 1;
+  height: 34px;
+  padding: 0 12px;
+  background: rgba(20, 26, 42, 0.7);
+  border: 1px solid rgba(120, 140, 180, 0.22);
+  border-radius: 6px;
+  color: rgba(220, 230, 250, 0.95);
+  font-size: 13px;
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.sp-input:focus {
+  border-color: rgba(120, 200, 255, 0.6);
+}
+
+.sp-input::placeholder {
+  color: rgba(140, 150, 170, 0.5);
+}
+
+/* ── 通用按钮 ── */
+.sp-btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(120, 140, 180, 0.28);
+  background: rgba(20, 26, 42, 0.7);
+  color: rgba(200, 210, 230, 0.85);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.sp-btn:hover:not(:disabled) {
+  background: rgba(40, 50, 70, 0.8);
+  color: rgba(220, 230, 250, 1);
+}
+
+.sp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sp-btn-install {
+  border-color: rgba(120, 200, 150, 0.45);
+  color: rgba(180, 240, 200, 0.95);
+}
+
+.sp-btn-install:hover:not(:disabled) {
+  background: rgba(40, 80, 60, 0.6);
+  border-color: rgba(120, 200, 150, 0.7);
+}
+
+.sp-btn-uninstall {
+  border-color: rgba(220, 130, 130, 0.45);
+  color: rgba(240, 200, 200, 0.95);
+}
+
+.sp-btn-uninstall:hover:not(:disabled) {
+  background: rgba(80, 40, 40, 0.6);
+  border-color: rgba(220, 130, 130, 0.7);
+}
+
+.sp-btn-export {
+  border-color: rgba(120, 170, 220, 0.45);
+  color: rgba(180, 210, 240, 0.95);
+}
+
+.sp-btn-export:hover:not(:disabled) {
+  background: rgba(40, 60, 80, 0.6);
+  border-color: rgba(120, 170, 220, 0.7);
+}
+
+.sp-btn-import,
+.sp-btn-refresh {
+  border-color: rgba(120, 200, 255, 0.45);
+  color: rgba(180, 220, 250, 0.95);
+}
+
+.sp-btn-import:hover:not(:disabled),
+.sp-btn-refresh:hover:not(:disabled) {
+  background: rgba(40, 70, 100, 0.6);
+  border-color: rgba(120, 200, 255, 0.7);
+}
+
+/* ── 通知 / 错误 ── */
+.sp-notice {
+  padding: 8px 14px;
+  background: rgba(60, 120, 80, 0.15);
+  border: 1px solid rgba(120, 200, 150, 0.35);
+  border-radius: 6px;
+  color: rgba(200, 240, 220, 0.95);
+  font-size: 13px;
+}
+
+.sp-error {
+  padding: 8px 14px;
+  background: rgba(120, 60, 60, 0.15);
+  border: 1px solid rgba(220, 130, 130, 0.35);
+  border-radius: 6px;
+  color: rgba(250, 220, 220, 0.95);
+  font-size: 13px;
+}
+
+/* ── 区块 ── */
+.sp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sp-section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(200, 210, 230, 0.85);
+  letter-spacing: 0.4px;
+  border-left: 3px solid rgba(120, 200, 255, 0.5);
+  padding-left: 10px;
+}
+
+.sp-empty {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: rgba(160, 170, 190, 0.6);
+  background: rgba(20, 26, 42, 0.4);
+  border-radius: 6px;
+  border: 1px dashed rgba(120, 140, 180, 0.18);
+}
+
+/* ── 已安装列表 ── */
+.sp-installed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sp-installed-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(20, 26, 42, 0.5);
+  border: 1px solid rgba(120, 140, 180, 0.15);
+  border-radius: 6px;
+  font-size: 13px;
+  color: rgba(200, 210, 230, 0.85);
+}
+
+.sp-installed-name {
+  font-weight: 600;
+  color: rgba(220, 230, 250, 0.95);
+}
+
+.sp-installed-version {
+  color: rgba(120, 200, 255, 0.85);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+}
+
+.sp-installed-author {
+  color: rgba(160, 170, 190, 0.7);
+}
+
+.sp-installed-at {
+  margin-left: auto;
+  color: rgba(140, 150, 170, 0.55);
+  font-size: 11px;
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+}
+
+/* ── 卡片网格 ── */
+.sp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* ── 技能卡片 ── */
+.sp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(20, 26, 42, 0.55);
+  border: 1px solid rgba(120, 140, 180, 0.2);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.sp-card:hover {
+  border-color: rgba(120, 200, 255, 0.4);
+  background: rgba(30, 38, 58, 0.65);
+}
+
+.sp-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sp-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(220, 230, 250, 0.95);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  word-break: break-all;
+}
+
+.sp-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(180, 190, 210, 0.7);
+}
+
+.sp-meta-version {
+  color: rgba(120, 200, 255, 0.85);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+}
+
+.sp-meta-author {
+  color: rgba(160, 170, 190, 0.65);
+}
+
+.sp-card-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(180, 190, 210, 0.7);
+}
+
+/* ── 宪章徽章 ── */
+.sp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.sp-badge-ok {
+  background: rgba(60, 140, 90, 0.18);
+  color: rgba(180, 240, 200, 0.95);
+  border: 1px solid rgba(120, 200, 150, 0.4);
+}
+
+.sp-badge-warn {
+  background: rgba(180, 130, 60, 0.18);
+  color: rgba(250, 220, 180, 0.95);
+  border: 1px solid rgba(220, 180, 100, 0.4);
+}
+
+/* ── 卡片按钮 ── */
+.sp-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sp-card-actions .sp-btn {
+  flex: 1;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}

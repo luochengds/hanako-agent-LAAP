@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Aris self-report — generated cognitive state introspection",
+  "type": "object",
+  "properties": {
+    "attention_focus": {
+      "type": "string",
+      "enum": ["user", "self", "task", "world", "memory", "planning", "learning", "idle"],
+      "description": "Current focus of attention"
+    },
+    "emotional_state": {
+      "type": "string",
+      "description": "Current emotional state description"
+    },
+    "certainty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How certain the agent feels about its current understanding"
+    },
+    "memory_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to memories influencing this state"
+    },
+    "urgency": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Sense of urgency (0 = calm, 1 = immediate action needed)"
+    }
+  },
+  "required": ["attention_focus", "emotional_state", "certainty"]
+}

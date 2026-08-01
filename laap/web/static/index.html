@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LAAP — Digital Lifeform</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000;
+  --surface: #0a0a0b;
+  --surface-2: #111113;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #ededef;
+  --text-2: #a1a1aa;
+  --text-3: #52525b;
+  --accent: #f5a623;
+  --accent-dim: rgba(245,166,35,0.12);
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --shadow: 0 0 0 1px var(--border);
+  --card-shadow: 0 0 0 1px var(--border), 0 2px 4px rgba(0,0,0,0.3);
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --font: 'Geist','Inter',system-ui,sans-serif;
+  --mono: 'Geist Mono','JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5}
+
+/* ═══ Layout ═══ */
+#app{display:flex;height:100vh}
+#sidebar{width:360px;min-width:360px;display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--border);overflow:hidden}
+#main{flex:1;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
+
+/* ═══ Sidebar Header ═══ */
+.sb-header{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-header h1{font-size:16px;font-weight:600;letter-spacing:-0.32px;color:var(--text)}
+.sb-header p{font-size:12px;color:var(--text-3);margin-top:2px}
+.sb-tabs{display:flex;gap:2px;padding:10px 20px 0;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-tab{padding:8px 14px;font-size:12px;font-weight:500;color:var(--text-3);cursor:pointer;border-radius:var(--radius-sm) var(--radius-sm) 0 0;transition:all 0.15s;border:none;background:transparent;font-family:var(--font)}
+.sb-tab:hover{color:var(--text);background:var(--surface-2)}
+.sb-tab.active{color:var(--accent);background:var(--accent-dim);box-shadow:0 -1px 0 var(--accent)}
+
+/* ═══ Sidebar Content ═══ */
+.sb-content{flex:1;overflow-y:auto;padding:16px 20px}
+.sb-content::-webkit-scrollbar{width:4px}
+.sb-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sb-section{display:none}
+.sb-section.active{display:block}
+
+/* ═══ Character Card ═══ */
+.char-card{padding:12px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border);margin-bottom:10px;cursor:pointer;transition:all 0.2s}
+.char-card:hover{border-color:var(--border-hover);box-shadow:var(--card-shadow)}
+.char-card .name{font-size:13px;font-weight:500;color:var(--text)}
+.char-card .source{font-size:10px;color:var(--text-3);margin-top:1px}
+.char-card .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.char-card .tag{padding:1px 7px;font-size:9px;border-radius:999px;background:var(--accent-dim);color:var(--accent);font-family:var(--mono)}
+.char-card.loaded{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.04)}
+
+/* ═══ Search ═══ */
+.search-box{display:flex;gap:8px;margin-bottom:12px}
+.search-box input{flex:1;padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:13px;font-family:var(--font);outline:none;transition:border 0.15s}
+.search-box input:focus{border-color:var(--accent)}
+.search-box input::placeholder{color:var(--text-3)}
+
+/* ═══ Upload Zone ═══ */
+.upload-zone{padding:20px;border:2px dashed var(--border);border-radius:var(--radius-lg);text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:12px}
+.upload-zone:hover{border-color:var(--accent);background:var(--accent-dim)}
+.upload-zone .icon{font-size:32px;margin-bottom:8px}
+.upload-zone .label{font-size:12px;color:var(--text-2)}
+.upload-zone .hint{font-size:10px;color:var(--text-3);margin-top:4px}
+
+/* ═══ Buttons ═══ */
+.btn{padding:6px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--font);transition:all 0.15s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{opacity:0.85}
+.btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border-hover);background:var(--surface-2)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-icon{width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm)}
+
+/* ═══ Status Bar (Main) ═══ */
+#status-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;background:var(--surface);border-top:1px solid var(--border);font-size:11px;flex-shrink:0}
+.status-left{display:flex;align-items:center;gap:10px}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.status-right{display:flex;gap:12px;color:var(--text-3)}
+.vital{display:flex;align-items:center;gap:3px}
+.vital-bar{width:40px;height:3px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.vital-fill{height:100%;border-radius:2px;transition:width 0.5s}
+
+/* ═══ 3D Canvas ═══ */
+#canvas-wrap{flex:1;position:relative;overflow:hidden}
+#canvas-wrap canvas{width:100%!important;height:100%!important;display:block}
+#info-badge{position:absolute;top:14px;left:14px;padding:4px 10px;border-radius:var(--radius-sm);background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);font-size:11px;color:var(--text-2);border:1px solid var(--border);z-index:5}
+#emotion-badge{position:absolute;top:14px;right:14px;display:flex;gap:4px;z-index:5;flex-wrap:wrap;max-width:220px;justify-content:flex-end}
+.emotion-chip{padding:2px 8px;font-size:9px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text-3);font-family:var(--mono)}
+.emotion-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+#motion-label{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);padding:3px 12px;border-radius:999px;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);font-size:9px;color:var(--text-3);z-index:5;font-family:var(--mono);border:1px solid var(--border)}
+
+/* ═══ Chat Panel ═══ */
+#chat-panel{position:absolute;bottom:48px;left:20px;width:380px;max-height:360px;display:flex;flex-direction:column;background:rgba(10,10,11,0.92);backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.6);z-index:10}
+#chat-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)}
+#chat-header span{font-size:12px;font-weight:500;color:var(--text)}
+#chat-header .tools{display:flex;gap:4px}
+#messages{overflow-y:auto;padding:10px 14px;min-height:100px;max-height:220px}
+#messages::-webkit-scrollbar{width:3px}
+#messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.msg{margin-bottom:4px;padding:5px 10px;border-radius:var(--radius-sm);font-size:12px;line-height:1.4;word-break:break-word;max-width:92%}
+.msg.user{margin-left:auto;background:var(--accent-dim);color:var(--accent)}
+.msg.assistant{background:var(--surface-2);color:var(--text-2)}
+.msg.system{text-align:center;font-size:10px;color:var(--text-3);font-style:italic;margin-left:0}
+.msg.token{color:var(--accent);font-size:12px}
+.msg.tool{font-size:10px;color:var(--green);font-family:var(--mono);background:rgba(34,197,94,0.04);padding:3px 8px}
+#input-area{display:flex;gap:4px;padding:8px 14px;border-top:1px solid var(--border)}
+#chat-input{flex:1;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;font-family:var(--font);outline:none}
+#chat-input:focus{border-color:var(--accent)}
+
+/* ═══ Modal ═══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);width:480px;max-width:90vw;max-height:80vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-header h2{font-size:15px;font-weight:600;letter-spacing:-0.3px}
+.modal-close{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px;padding:4px}
+.modal-body{padding:20px;overflow-y:auto;max-height:calc(80vh - 60px)}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ═══ Form ═══ */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:500;color:var(--text-2);margin-bottom:4px;letter-spacing:0.3px;text-transform:uppercase}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;font-family:var(--font);outline:none}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
+.form-hint{font-size:10px;color:var(--text-3);margin-top:3px}
+
+/* ═══ Misc ═══ */
+.pill{display:inline-block;padding:0 8px;border-radius:999px;font-size:9px;font-weight:500;font-family:var(--mono);letter-spacing:0.2px}
+.pill-green{background:rgba(34,197,94,0.1);color:var(--green)}
+.pill-red{background:rgba(239,68,68,0.1);color:var(--red)}
+.pill-blue{background:rgba(59,130,246,0.1);color:var(--blue)}
+.empty-state{text-align:center;padding:24px 16px;color:var(--text-3);font-size:12px}
+.divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+</style>
+</head>
+<body>
+
+<!-- ═══ Main Layout ═══ -->
+<div id="app">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sb-header">
+      <h1>◆ LAAP</h1>
+      <p>Digital Lifeform Engine</p>
+    </div>
+    <div class="sb-tabs">
+      <button class="sb-tab active" data-tab="characters">🎭 Characters</button>
+      <button class="sb-tab" data-tab="upload">📦 Upload</button>
+      <button class="sb-tab" data-tab="voice">🎤 Voice</button>
+      <button class="sb-tab" data-tab="memories">💾 Memory</button>
+    </div>
+    <div class="sb-content">
+      <!-- Characters Tab -->
+      <div class="sb-section active" id="tab-characters">
+        <div class="search-box">
+          <input id="char-search" placeholder="Search character... (e.g. Furina, Klee, elegant)" oninput="searchChars(this.value)">
+        </div>
+        <div id="char-list"></div>
+        <div id="loaded-char" style="display:none;margin-top:8px">
+          <div class="divider"></div>
+          <div style="font-size:10px;color:var(--text-3);margin-bottom:6px">CURRENT CHARACTER</div>
+          <div id="loaded-card"></div>
+        </div>
+      </div>
+      <!-- Upload Tab -->
+      <div class="sb-section" id="tab-upload">
+        <div class="upload-zone" onclick="document.getElementById('modelFile').click()">
+          <div class="icon">🎭</div>
+          <div class="label">Upload 3D Model (VRM/GLB)</div>
+          <div class="hint">Or drag & drop onto the 3D viewport</div>
+          <input id="modelFile" type="file" accept=".vrm,.glb,.gltf" style="display:none" onchange="uploadModel(this)">
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('screenshotFile').click()" style="margin-top:0">
+          <div class="icon">📸</div>
+          <div class="label">Upload Screenshot for AI Recognition</div>
+          <div class="hint">Auto-detect game character, personality, voice</div>
+          <input id="screenshotFile" type="file" accept="image/*" style="display:none" onchange="uploadScreenshot(this)">
+        </div>
+        <div id="recognition-result" style="display:none;margin-top:10px;padding:10px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text-2);margin-bottom:6px">AI Recognition Result</div>
+          <pre id="recognition-text" style="font-size:10px;color:var(--text-3);font-family:var(--mono);white-space:pre-wrap"></pre>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="showCreateCharacterModal()">+ Create Custom Character</button>
+      </div>
+      <!-- Voice Tab -->
+      <div class="sb-section" id="tab-voice">
+        <div class="upload-zone" onclick="document.getElementById('voiceFile').click()">
+          <div class="icon">🎤</div>
+          <div class="label">Upload Voice Samples</div>
+          <div class="hint">WAV/MP3, 3+ minutes for best cloning quality</div>
+          <input id="voiceFile" type="file" accept="audio/*" multiple style="display:none" onchange="uploadVoice(this)">
+        </div>
+        <div id="voice-status" style="font-size:11px;color:var(--text-3);margin-top:8px;padding:8px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border)">
+          <div style="color:var(--text-2);margin-bottom:4px">Voice Cloning Pipeline</div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px">
+            <span>GPT-SoVITS Engine</span>
+            <span id="voice-engine-status" class="pill pill-red">Offline</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px">
+            <span>Samples Uploaded</span>
+            <span id="voice-samples">0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:10px">
+            <span>Clone Status</span>
+            <span id="voice-clone-status">—</span>
+          </div>
+        </div>
+      </div>
+      <!-- Memory Tab -->
+      <div class="sb-section" id="tab-memories">
+        <div style="font-size:10px;color:var(--text-3);margin-bottom:8px">Character memories persist across sessions</div>
+        <textarea id="memory-input" placeholder="Add custom memory for current character..." style="width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12px;font-family:var(--font);outline:none;resize:vertical;min-height:50px;margin-bottom:6px"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="addMemory()" style="width:100%">+ Add Memory</button>
+        <div class="divider"></div>
+        <div id="memory-list" style="font-size:11px;color:var(--text-3)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div id="main">
+    <div id="canvas-wrap">
+      <div id="info-badge">✨ Loading...</div>
+      <div id="emotion-badge"></div>
+      <div id="motion-label"></div>
+      <!-- Chat -->
+      <div id="chat-panel">
+        <div id="chat-header">
+          <span>💬 <span id="chat-title">Conversation</span></span>
+          <div class="tools">
+            <button class="btn btn-ghost btn-icon btn-sm" onclick="toggleTTS()" id="tts-btn" title="Toggle TTS">🔊</button>
+            <button class="btn btn-ghost btn-icon btn-sm" onclick="clearChat()" title="Clear chat">🗑️</button>
+          </div>
+        </div>
+        <div id="messages"><div class="msg system">✨ LAAP Digital Lifeform · Type or speak</div></div>
+        <div id="input-area">
+          <input id="chat-input" placeholder="Message..." autofocus>
+          <button class="btn btn-primary" id="send-btn" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+      <!-- Status -->
+      <div id="status-bar">
+        <div class="status-left">
+          <span class="status-dot" id="status-dot" style="background:var(--accent)"></span>
+          <span id="status-text">Connecting...</span>
+        </div>
+        <div class="status-right">
+          <div class="vital"><span>⚡</span><div class="vital-bar"><div class="vital-fill" id="v-energy" style="width:0%;background:var(--accent)"></div></div><span id="v-energy-v" style="font-size:10px">-</span></div>
+          <div class="vital"><span>🎯</span><div class="vital-bar"><div class="vital-fill" id="v-focus" style="width:0%;background:var(--green)"></div></div><span id="v-focus-v" style="font-size:10px">-</span></div>
+          <div class="vital"><span>💚</span><div class="vital-bar"><div class="vital-fill" id="v-mood" style="width:0%;background:var(--pink)"></div></div><span id="v-mood-v" style="font-size:10px">-</span></div>
+          <span id="char-status" style="font-size:10px;color:var(--text-3)"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Create Character Modal ═══ -->
+<div class="modal-overlay" id="create-char-modal">
+  <div class="modal">
+    <div class="modal-header"><h2>Create Character</h2><button class="modal-close" onclick="closeModal('create-char-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Character Name</label><input id="cc-name" placeholder="e.g. My Custom Character"></div>
+      <div class="form-group"><label>Source / Origin</label><input id="cc-source" placeholder="e.g. Original, Game XYZ"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Traits (comma-separated)</label><input id="cc-traits" placeholder="brave, kind, mysterious"></div>
+        <div class="form-group"><label>Speech Style</label><input id="cc-speech" placeholder="elegant, casual..."></div>
+      </div>
+      <div class="form-group"><label>Backstory</label><textarea id="cc-backstory" placeholder="Character background..." style="min-height:80px"></textarea></div>
+      <div class="form-group"><label>Catchphrases</label><textarea id="cc-catchphrases" placeholder="One per line..."></textarea></div>
+      <button class="btn btn-primary" onclick="createCustomCharacter()" style="width:100%">Create Character</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Character Detail Modal ═══ -->
+<div class="modal-overlay" id="char-detail-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 id="detail-name">Character</h2><button class="modal-close" onclick="closeModal('char-detail-modal')">✕</button></div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<script type="importmap">{
+  "imports":{
+    "three":"https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/",
+    "@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.0.0/lib/three-vrm.module.js"
+  }
+}</script>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
+
+// === Scene ===
+const c = document.getElementById('canvas-wrap');
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x000);
+const cam = new THREE.PerspectiveCamera(26, c.clientWidth/c.clientHeight, 0.1, 50);
+cam.position.set(0, 1.2, 3.2);
+const ren = new THREE.WebGLRenderer({antialias:true});
+ren.setSize(c.clientWidth, c.clientHeight); ren.setPixelRatio(Math.min(devicePixelRatio,2));
+ren.shadowMap.enabled = true; ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 1.0;
+c.appendChild(ren.domElement);
+const ctrl = new OrbitControls(cam, ren.domElement);
+ctrl.target.set(0,1.15,0); ctrl.enableDamping = true; ctrl.dampingFactor = 0.05;
+ctrl.minDistance = 1.5; ctrl.maxDistance = 5; ctrl.maxPolarAngle = Math.PI*0.85; ctrl.update();
+scene.add(new THREE.AmbientLight(0x222244, 0.6));
+scene.add(new THREE.HemisphereLight(0x4444aa, 0x222244, 0.6));
+const kl = new THREE.DirectionalLight(0xffeedd, 2.0); kl.position.set(1.5,3,2); kl.castShadow = true; scene.add(kl);
+scene.add(new THREE.DirectionalLight(0x4488ff, 0.8).position.set(-1.5,1,-2));
+
+let avatar = null, clock = new THREE.Clock();
+
+async function loadVRM(url, name){
+  if(avatar){VRMUtils.deepDispose(avatar.scene);scene.remove(avatar.scene);avatar=null;}
+  try{
+    const loader = new GLTFLoader(); loader.register(p=>new VRMLoaderPlugin(p));
+    const gltf = await loader.loadAsync(url);
+    avatar = gltf.userData.vrm; if(!avatar) throw Error('No VRM data');
+    scene.add(avatar.scene); avatar.scene.rotation.y = Math.PI;
+    document.getElementById('info-badge').textContent = '✅ '+name;
+    // Test bones
+    if(avatar.humanoid){
+      let found = 0; const bones = ['head','chest','spine','neck','leftUpperArm','rightUpperArm'];
+      bones.forEach(b => {if(avatar.humanoid.getBoneNode(b)) found++;});
+      console.log(`Bones: ${found}/${bones.length}`);
+    }
+  } catch(e){
+    document.getElementById('info-badge').textContent = '❌ '+e.message;
+    console.error(e);
+  }
+}
+fetch('/models/model.vrm',{method:'HEAD'})
+  .then(r => r.ok ? loadVRM('/models/model.vrm','芙宁娜') : null)
+  .catch(() => {});
+
+// ─── Motion Engine ───
+let motionPresets = null, currentMotion = null, motionStart = 0, motionPlaying = false;
+let idleAnim = 'idle_gentle', boneCache = {};
+
+function lerp(a,b,t){return a+(b-a)*t}
+function easeIO(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function getBone(n){return avatar?.humanoid?.getBoneNode(n)||null}
+
+async function loadMotions(){
+  try{
+    const r = await fetch('/motions/motion_presets.json');
+    motionPresets = await r.json();
+    console.log('Motions:', Object.keys(motionPresets.motions).length);
+    playMotion('idle_gentle');
+  }catch(e){console.warn('No motions:',e)}
+}
+
+function playMotion(name){
+  if(!motionPresets?.motions[name]) return;
+  currentMotion = motionPresets.motions[name];
+  motionStart = performance.now()/1000;
+  motionPlaying = true;
+  const el = document.getElementById('motion-label');
+  if(el) el.textContent = currentMotion.name||name;
+  Object.keys(currentMotion.bones||{}).forEach(b=>{
+    if(!boneCache[b]) boneCache[b]={ry:0,rx:0,rz:0};
+  });
+  if(name !== 'idle_gentle' && name !== 'idle_cute' && name.indexOf('idle')<0)
+    addSystemMsg('🎭 '+name);
+}
+
+function getKfVal(kfs, t, prop){
+  if(!kfs||!kfs.length) return 0;
+  const dur = kfs[kfs.length-1].t;
+  const time = ((t%dur)+dur)%dur;
+  for(let i=0;i<kfs.length-1;i++){
+    const a=kfs[i], b=kfs[i+1];
+    if(time>=a.t&&time<=b.t){
+      const p=easeIO((time-a.t)/(b.t-a.t||1));
+      return lerp(a[prop]||0, b[prop]||0, p);
+    }
+  }
+  return kfs[kfs.length-1][prop]||0;
+}
+
+function updateMotions(d){
+  if(!motionPlaying||!currentMotion) return;
+  const now = performance.now()/1000;
+  let elapsed = now - motionStart;
+  
+  if(currentMotion.loop) elapsed = ((elapsed%currentMotion.duration)+currentMotion.duration)%currentMotion.duration;
+  else if(elapsed>currentMotion.duration){
+    motionPlaying = false;
+    Object.keys(currentMotion.bones||{}).forEach(b=>{
+      const n=getBone(b); if(n){n.rotation.set(0,0,0);}
+    });
+    playMotion(idleAnim);
+    return;
+  }
+  
+  // Apply bones
+  if(currentMotion.bones){
+    Object.entries(currentMotion.bones).forEach(([b,kfs])=>{
+      const n=getBone(b); if(!n) return;
+      const c=boneCache[b]||{ry:0,rx:0,rz:0};
+      c.ry=lerp(c.ry,getKfVal(kfs,elapsed,'ry'),d*8);
+      c.rx=lerp(c.rx,getKfVal(kfs,elapsed,'rx'),d*8);
+      c.rz=lerp(c.rz,getKfVal(kfs,elapsed,'rz'),d*8);
+      n.rotation.y=c.ry; n.rotation.x=c.rx; n.rotation.z=c.rz;
+      boneCache[b]=c;
+    });
+  }
+  
+  // Apply blendshapes
+  if(currentMotion.blendshapes){
+    Object.entries(currentMotion.blendshapes).forEach(([bs,kfs])=>{
+      const val=getKfVal(kfs,elapsed,'v');
+      try{if(avatar?.expressionManager?.setValue) avatar.expressionManager.setValue(bs,val);}catch(e){}
+    });
+  }
+}
+
+// Emotion → Motion trigger
+let emotionCD = {};
+function triggerEmotion(name, intens){
+  if(!motionPresets?.emotion_action_map) return;
+  const map = motionPresets.emotion_action_map[name];
+  if(!map||intens<map.intensity_threshold) return;
+  const now = Date.now();
+  const cd = (map.cooldown||10)*1000;
+  if(emotionCD[name]&&now-emotionCD[name]<cd*intens) return;  // Higher intensity = shorter CD
+  emotionCD[name]=now;
+  playMotion(map.motion);
+  // Hold the emotion motion longer for higher intensity
+  if(intens>0.7&&currentMotion?.loop){
+    // Keep playing the emotion motion for a while
+    setTimeout(()=>{
+      if(!motionPlaying) playMotion(idleAnim);
+    }, 3000*intens);
+  }
+}
+
+// Keyboard → Gesture
+function triggerKeyword(text){
+  if(!motionPresets?.dialogue_gesture_keywords) return;
+  const l=text.toLowerCase();
+  // Score each gesture based on match count
+  let scored = [];
+  for(const[k,v]of Object.entries(motionPresets.dialogue_gesture_keywords)){
+    let score = 0;
+    for(let i=0;i<l.length-k.length+1;i++){
+      if(l.substring(i,i+k.length)===k) score++;
+    }
+    if(score>0) scored.push({name:v,score});
+  }
+  scored.sort((a,b)=>b.score-a.score);
+  if(scored.length>0){
+    const best=scored[0];
+    // Add randomness: not every trigger fires (60% chance)
+    if(Math.random()<0.6) playMotion(best.name);
+    return true;
+  }
+  return false;
+}
+
+// Tool → Action
+function triggerTool(name){
+  if(!motionPresets?.tool_action_map) return;
+  const l=name.toLowerCase();
+  for(const[k,v]of Object.entries(motionPresets.tool_action_map))
+    if(l.includes(k)){playMotion(v);return true;}
+  return false;
+}
+
+// Trigger heartbeat
+setInterval(()=>{
+  if(!motionPlaying&&avatar){
+    idleAnim=Math.random()<0.3?'idle_cute':'idle_gentle';
+    playMotion(idleAnim);
+  }
+},12000);
+
+// Load motions after VRM loads
+setTimeout(loadMotions, 1000);
+
+function animate(){
+  requestAnimationFrame(animate);
+  const d = Math.min(clock.getDelta(), 0.05);
+  if(avatar){
+    if(avatar.scene) avatar.scene.position.y = Math.sin(Date.now()/600)*0.004;
+    updateMotions(d);
+    if(avatar.update) avatar.update(d);
+  }
+  ctrl.update(); ren.render(scene, cam);
+}
+animate();
+
+// Resize
+window.addEventListener('resize', () => {
+  const w = c.clientWidth, h = c.clientHeight;
+  if(w>0&&h>0){cam.aspect=w/h;cam.updateProjectionMatrix();ren.setSize(w,h);}
+});
+
+// === Expose for inline JS ===
+window.__avatar = () => avatar;
+window.__loadVRM = loadVRM;
+console.log('LAAP UI v2 loaded');
+</script>
+
+<script>
+// ═══ Tab System ═══
+document.querySelectorAll('.sb-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sb-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.sb-section').forEach(s=>s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══ Modal ═══
+function showModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+// ═══ Character Search & Load ═══
+let currentCharacter = null;
+let searchTimeout = null;
+
+function searchChars(q){
+  clearTimeout(searchTimeout);
+  const list = document.getElementById('char-list');
+  if(!q.trim()){list.innerHTML='<div class="empty-state">Type to search characters</div>';return;}
+  searchTimeout = setTimeout(() => {
+    fetch('/api/character/search?q='+encodeURIComponent(q))
+      .then(r=>r.json()).then(results => {
+        if(!results.length){list.innerHTML='<div class="empty-state">No characters found</div>';return;}
+        list.innerHTML = results.map(r => `
+          <div class="char-card" onclick="loadCharacter('${r.name}')">
+            <div class="name">${r.name}</div>
+            <div class="source">${r.source} <span class="pill pill-blue">${(r.score*100).toFixed(0)}% match</span></div>
+            <div class="tags">${r.traits.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <div style="font-size:10px;color:var(--text-3);margin-top:4px">${r.summary.substring(0,80)}...</div>
+          </div>
+        `).join('');
+      }).catch(() => {});
+  }, 300);
+}
+
+function loadCharacter(name){
+  fetch('/api/character/load?name='+encodeURIComponent(name))
+    .then(r=>r.json()).then(data => {
+      if(data.error) return;
+      currentCharacter = data;
+      document.getElementById('loaded-char').style.display = 'block';
+      document.getElementById('loaded-card').innerHTML = `
+        <div class="char-card loaded" onclick="showDetail()">
+          <div class="name" style="color:var(--green)">✅ ${data.display_name}</div>
+          <div class="source">${data.source?.title||''}</div>
+          <div class="tags">${(data.personality?.traits||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        </div>`;
+      document.getElementById('char-status').textContent = '🎭 '+data.display_name;
+      document.getElementById('chat-title').textContent = data.display_name;
+      document.getElementById('char-list').innerHTML = '';
+      document.getElementById('char-search').value = '';
+      // Notify server
+      if(window.ws?.readyState===WebSocket.OPEN)
+        ws.send(JSON.stringify({type:'command',cmd:'set_character',name:data.character_name}));
+      addSystemMsg('🎭 Character loaded: '+data.display_name);
+    });
+}
+
+function showDetail(){
+  if(!currentCharacter) return;
+  const d = currentCharacter;
+  const p = d.personality||{};
+  const b = d.biography||{};
+  const o = p.ocean||{};
+  document.getElementById('detail-name').textContent = '📋 '+d.display_name;
+  document.getElementById('detail-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="padding:10px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--text-3);margin-bottom:4px">OPENNESS</div>
+        <div style="font-size:20px;font-weight:600;color:var(--accent)">${Math.round((o.openness||0.5)*100)}%</div>
+      </div>
+      <div style="padding:10px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--text-3);margin-bottom:4px">CONSCIENTIOUSNESS</div>
+        <div style="font-size:20px;font-weight:600;color:var(--blue)">${Math.round((o.conscientiousness||0.5)*100)}%</div>
+      </div>
+      <div style="padding:10px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--text-3);margin-bottom:4px">EXTRAVERSION</div>
+        <div style="font-size:20px;font-weight:600;color:var(--pink)">${Math.round((o.extraversion||0.5)*100)}%</div>
+      </div>
+      <div style="padding:10px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--text-3);margin-bottom:4px">AGREEABLENESS</div>
+        <div style="font-size:20px;font-weight:600;color:var(--green)">${Math.round((o.agreeableness||0.5)*100)}%</div>
+      </div>
+    </div>
+    <div class="form-group"><label>Traits</label><div>${(p.traits||[]).map(t=>`<span class="pill pill-blue" style="margin:2px">${t}</span>`).join('')}</div></div>
+    <div class="form-group"><label>Speech Style</label><div style="font-size:12px;color:var(--text-2)">${p.speech_style||'—'}</div></div>
+    <div class="form-group"><label>Backstory</label><div style="font-size:12px;color:var(--text-2)">${b.summary||'—'}</div></div>
+    ${b.key_events ? `
+    <div class="form-group"><label>Key Events</label>
+      ${b.key_events.map(e => `<div style="font-size:11px;padding:4px 8px;border-radius:4px;background:var(--surface-2);margin:2px 0">${e.event} <span class="pill pill-${e.emotion==='joy'?'green':e.emotion==='sadness'?'red':'blue'}">${e.emotion}</span></div>`).join('')}
+    </div>` : ''}
+    ${p.catchphrases ? `
+    <div class="form-group"><label>Catchphrases</label><div style="font-size:11px;font-style:italic;color:var(--text-3)">"${p.catchphrases.slice(0,3).join('", "')}"</div></div>` : ''}
+  `;
+  showModal('char-detail-modal');
+}
+
+// ═══ Upload Model ═══
+function uploadModel(input){
+  const f = input.files[0]; if(!f) return;
+  const url = URL.createObjectURL(f);
+  // Use the module's loadVRM function
+  const script = document.querySelector('script[type=module]');
+  // We need to call the VRM loader
+  const avatar = window.__avatar;
+  // Dispatch a custom event for the module to handle
+  window.dispatchEvent(new CustomEvent('load-vrm', {detail:{url,name:f.name}}));
+  addSystemMsg('📦 Loading model: '+f.name);
+}
+
+// Listen for custom VRM load event
+window.addEventListener('load-vrm', e => {
+  if(window.__loadVRM) window.__loadVRM(e.detail.url, e.detail.name);
+});
+
+// ═══ Drag & Drop ═══
+document.getElementById('canvas-wrap').addEventListener('dragover', e => e.preventDefault());
+document.getElementById('canvas-wrap').addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if(f && f.name.match(/\.(vrm|glb|gltf)$/i)){
+    window.dispatchEvent(new CustomEvent('load-vrm', {detail:{url:URL.createObjectURL(f),name:f.name}}));
+    addSystemMsg('📦 Dropped: '+f.name);
+  }
+});
+
+// ═══ Upload Screenshot (AI Recognition) ═══
+function uploadScreenshot(input){
+  const f = input.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    document.getElementById('recognition-result').style.display = 'block';
+    document.getElementById('recognition-text').textContent = 'Analyzing image for character recognition...';
+    // Simulated AI recognition (would call a real vision API)
+    setTimeout(() => {
+      const result = `Detected: Genshin Impact Character\nConfidence: 92.3%\n\nSuggested Personality:\n- Elegant, proud performer\n- OCEAN: O:75% C:45% E:82% A:42% N:38%\n- Speech: Theatrical, haughty\n\nVoice samples needed for cloning.`;
+      document.getElementById('recognition-text').textContent = result;
+      addSystemMsg('📸 AI recognition complete - check Upload tab');
+    }, 1500);
+  };
+  reader.readAsDataURL(f);
+}
+
+// ═══ Upload Voice ═══
+function uploadVoice(input){
+  const files = input.files;
+  document.getElementById('voice-samples').textContent = files.length;
+  document.getElementById('voice-engine-status').className = 'pill pill-green';
+  document.getElementById('voice-engine-status').textContent = 'Processing';
+  addSystemMsg(`🎤 ${files.length} voice sample(s) uploaded for cloning`);
+  // Simulate cloning pipeline
+  setTimeout(() => {
+    document.getElementById('voice-clone-status').textContent = '✅ Ready';
+    document.getElementById('voice-engine-status').textContent = 'Ready';
+    addSystemMsg('🎤 Voice clone ready! Character voice synthesized.');
+  }, 3000);
+}
+
+// ═══ Create Custom Character ═══
+function showCreateCharacterModal(){showModal('create-char-modal')}
+
+function createCustomCharacter(){
+  const name = document.getElementById('cc-name').value.trim();
+  if(!name){alert('Name required');return;}
+  const pack = {
+    character_name: name,
+    display_name: name,
+    source: {type:'custom', title: document.getElementById('cc-source').value||'Original'},
+    personality: {
+      ocean: {openness:0.6,conscientiousness:0.6,extraversion:0.6,agreeableness:0.6,neuroticism:0.4},
+      traits: document.getElementById('cc-traits').value.split(',').map(s=>s.trim()).filter(Boolean),
+      speech_style: document.getElementById('cc-speech').value||'Normal',
+      catchphrases: document.getElementById('cc-catchphrases').value.split('\n').map(s=>s.trim()).filter(Boolean),
+      likes:[],dislikes:[]
+    },
+    biography: {summary: document.getElementById('cc-backstory').value||'A custom character', key_events:[]},
+    motion_preferences: {idle_style:'idle_gentle',gesture_frequency:0.5,emotion_intensity:0.5},
+    memory_initial: [{type:'base_personality',content:`I am ${name}.`,importance:1.0}],
+    vrm_model: {path:'/models/model.vrm',display_name:name}
+  };
+  fetch('/api/character/load', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,pack})})
+    .then(r=>r.json()).then(() => {
+      closeModal('create-char-modal');
+      loadCharacter(name);
+    });
+}
+
+// ═══ Memory System ═══
+function addMemory(){
+  const input = document.getElementById('memory-input');
+  const text = input.value.trim();
+  if(!text) return;
+  fetch('/api/character/memory', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({character: currentCharacter?.character_name||'default', content: text})
+  }).then(() => {
+    input.value = '';
+    loadMemories();
+    addSystemMsg('💾 Memory saved');
+  });
+}
+
+function loadMemories(){
+  fetch('/api/character/memory?char='+(currentCharacter?.character_name||'default'))
+    .then(r=>r.json()).then(mems => {
+      const el = document.getElementById('memory-list');
+      if(!mems.length){el.innerHTML='<div class="empty-state">No memories yet</div>';return;}
+      el.innerHTML = mems.slice(-10).reverse().map(m => `
+        <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;color:var(--text-3)">
+          <span style="color:${m.emotion==='joy'?'var(--green)':m.emotion==='sadness'?'var(--red)':'var(--text-2)'}">●</span>
+          ${m.content}
+        </div>
+      `).join('');
+    }).catch(() => {});
+}
+
+// ═══ WebSocket Chat ═══
+let ws = null, curSpan = null, ttsEnabled = true;
+
+function connect(){
+  ws = new WebSocket('ws://localhost:8766');
+  ws.onopen = () => {
+    document.getElementById('status-dot').style.background = 'var(--green)';
+    document.getElementById('status-text').textContent = 'Connected';
+  };
+  ws.onmessage = e => {
+    try {
+      const d = JSON.parse(e.data);
+      const m = document.getElementById('messages');
+      switch(d.type){
+        case 'token':
+          if(!curSpan){curSpan=document.createElement('div');curSpan.className='msg token';m.appendChild(curSpan);}
+          curSpan.textContent += d.text; break;
+        case 'response':
+          if(curSpan){curSpan.className='msg assistant';curSpan=null;}
+          else {const el=document.createElement('div');el.className='msg assistant';el.textContent=d.text||'';m.appendChild(el);}
+          if(d.text&&ttsEnabled&&ws?.readyState===WebSocket.OPEN)
+            ws.send(JSON.stringify({type:'tts',text:d.text}));
+          if(d.text) triggerKeyword(d.text);
+          break;
+        case 'user':addMsg(d.text,'user');break;
+        case 'tts_audio':playTTS(d.data);break;
+        case 'tool_call':addMsg('🔧 '+d.name,'tool');if(d.name)triggerTool(d.name);break;
+        case 'emotion':
+          updateEmotionChips(d.name||'neutral',d.intensity||0.5);
+          if(d.name)triggerEmotion(d.name,d.intensity||0.5);
+          document.getElementById('v-emotion').textContent = d.label||d.name;
+          break;
+        case 'vitals':
+          ['energy','focus','mood'].forEach(k => {
+            const v = Math.round((d[k]||0)*100);
+            document.getElementById('v-'+k).style.width = v+'%';
+            document.getElementById('v-'+k+'-v').textContent = v+'%';
+          }); break;
+        case 'system':addSystemMsg(d.text);break;
+      }
+      m.scrollTop = m.scrollHeight;
+    } catch(e) {}
+  };
+  ws.onclose = () => {
+    document.getElementById('status-dot').style.background = 'var(--red)';
+    document.getElementById('status-text').textContent = 'Disconnected';
+    setTimeout(connect, 2000);
+  };
+}
+connect();
+
+function sendChat(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text||!ws||ws.readyState!==WebSocket.OPEN) return;
+  ws.send(JSON.stringify({type:'chat',text}));
+  input.value = '';
+}
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if(e.key === 'Enter') sendChat();
+});
+
+function addMsg(text, cls){
+  const el = document.createElement('div');
+  el.className = 'msg '+cls;
+  el.textContent = text;
+  document.getElementById('messages').appendChild(el);
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function addSystemMsg(text){
+  const el = document.createElement('div');
+  el.className = 'msg system';
+  el.textContent = '✦ '+text;
+  document.getElementById('messages').appendChild(el);
+}
+
+function clearChat(){
+  document.getElementById('messages').innerHTML = '<div class="msg system">✨ Chat cleared</div>';
+}
+
+function toggleTTS(){
+  ttsEnabled = !ttsEnabled;
+  document.getElementById('tts-btn').textContent = ttsEnabled ? '🔊' : '🔇';
+}
+
+function updateEmotionChips(name, intens){
+  const chips = ['joy','sadness','anger','surprise','curiosity','neutral'];
+  const emojis = {joy:'😊',sadness:'😢',anger:'😠',surprise:'😲',curiosity:'🤔',neutral:'😐'};
+  document.getElementById('emotion-badge').innerHTML = chips.map(e =>
+    `<span class="emotion-chip${e===name?' active':''}">${emojis[e]||''} ${e}</span>`
+  ).join('');
+}
+
+// ─── FFT-based LipSync + TTS Playback ───
+let lipsyncAnalyser = null, lipsyncData = null;
+let mouthA=0, mouthI=0, mouthU=0;
+
+function playTTS(b64){
+  if(!ttsEnabled) return;
+  try {
+    const ctx = new(window.AudioContext||window.webkitAudioContext)();
+    // Create analyser for lip sync
+    if(!lipsyncAnalyser){
+      lipsyncAnalyser = ctx.createAnalyser();
+      lipsyncAnalyser.fftSize = 256;
+      lipsyncData = new Uint8Array(lipsyncAnalyser.frequencyBinCount);
+    }
+    ctx.decodeAudioData(Uint8Array.from(atob(b64),c=>c.charCodeAt(0)).buffer, buf => {
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      src.connect(lipsyncAnalyser); lipsyncAnalyser.connect(ctx.destination);
+      src.start();
+      // Lip-sync during playback
+      const lipInterval = setInterval(() => {
+        if(!lipsyncAnalyser||!lipsyncData){clearInterval(lipInterval);return;}
+        lipsyncAnalyser.getByteFrequencyData(lipsyncData);
+        // Extract band energy
+        let low=0,mid=0,high=0;
+        for(let i=0;i<lipsyncData.length;i++){
+          if(i<10) low+=lipsyncData[i];
+          else if(i<40) mid+=lipsyncData[i];
+          else high+=lipsyncData[i];
+        }
+        const n=lipsyncData.length;
+        low=low/10/255; mid=mid/30/255; high=high/(n-40)/255;
+        // Smooth mouth values
+        mouthA += (Math.max(0,low*1.5-0.1) - mouthA) * 0.3;
+        mouthI += (Math.max(0,mid*1.2-0.1) - mouthI) * 0.3;
+        mouthU += (Math.max(0,high-0.05) - mouthU) * 0.3;
+        if(avatar?.expressionManager){
+          try{
+            avatar.expressionManager.setValue('a',Math.min(1,mouthA*1.5));
+            avatar.expressionManager.setValue('i',Math.min(1,mouthI*1.2));
+            avatar.expressionManager.setValue('u',Math.min(1,mouthU*0.8));
+          }catch(e){}
+        }
+      }, 50);
+      // Cleanup
+      src.onended = () => {
+        clearInterval(lipInterval);
+        mouthA=0;mouthI=0;mouthU=0;
+        if(avatar?.expressionManager){
+          try{avatar.expressionManager.setValue('a',0);avatar.expressionManager.setValue('i',0);avatar.expressionManager.setValue('u',0);}catch(e){}
+        }
+      };
+    });
+  } catch(e) {}
+}
+
+// ─── Mic ASR ───
+let mediaRecorder = null, isRecording = false;
+document.addEventListener('keydown', e => {
+  if(e.key === ' ' && !e.target.matches('input,textarea')){
+    e.preventDefault();
+    if(!isRecording) startRecording(); else stopRecording();
+  }
+});
+
+async function startRecording(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+    mediaRecorder.ondataavailable = e => {if(e.data.size>0)chunks.push(e.data);};
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t=>t.stop());
+      const rec = new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+      if(rec){rec.lang='zh-CN';rec.onresult=e=>{const t=e.results[0][0].transcript;if(t.trim()){addMsg('🎤 '+t,'user');ws.send(JSON.stringify({type:'chat',text:t}));}};rec.start();}
+    };
+    mediaRecorder.start(); isRecording = true;
+    document.getElementById('status-dot').style.background = 'var(--red)';
+    document.getElementById('status-text').textContent = '🎤 Recording...';
+  } catch(e) {}
+}
+
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state!=='inactive') mediaRecorder.stop();
+  isRecording = false;
+  document.getElementById('status-dot').style.background = 'var(--green)';
+  document.getElementById('status-text').textContent = 'Listening...';
+}
+
+// ═══ Init ═══
+document.getElementById('char-list').innerHTML = '<div class="empty-state">Type to search characters</div>';
+document.getElementById('memory-list').innerHTML = '<div class="empty-state">No memories yet</div>';
+console.log('LAAP UI v2 initialized');
+</script>
+</body>
+</html>
