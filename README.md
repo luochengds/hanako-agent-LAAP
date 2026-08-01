@@ -3,7 +3,7 @@
 > 把 LAAP 数字生命体架构与 Hanako 桌面端融为一体的开源发行版。
 
 [![Build macOS DMG](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](hanako/LICENSE)
 
 ---
@@ -192,10 +192,12 @@ Hanako 插件位于 `hanako/plugins/`，已内置：
 
 ## 许可证
 
-- LAAP Python 引擎：`pyproject.toml` 声明为 MIT。
-- Hanako 桌面端：`hanako/LICENSE` 声明为 Apache-2.0。
+本仓库整体作为 Hanako 与 LAAP 的整合发行版，以 **GNU General Public License v3.0 or later (GPL-3.0-or-later)** 发布，详见根目录 [`LICENSE`](LICENSE)。
 
-使用、修改或分发时请同时遵守两份许可证及 [`ARIS_CHARTER.md`](ARIS_CHARTER.md) 的治理条款。
+- LAAP Python 引擎：`pyproject.toml` 声明为 GPL-3.0-or-later。
+- Hanako 桌面端：其原始源码保留 `hanako/LICENSE` 中的 Apache-2.0 许可声明；Apache-2.0 与 GPL-3.0 兼容，因此可在本 GPL 整合发行版中继续以原许可条款使用。任何对 Hanako 原始文件的修改仍需遵守 Apache-2.0 并要求保留原始版权声明。
+
+使用、修改或分发时请同时遵守上述许可证及 [`ARIS_CHARTER.md`](ARIS_CHARTER.md) 的治理条款。
 
 ---
 

@@ -7,7 +7,7 @@ name = "laap"
 dynamic = ["version"]
 description = "Living Computation Paradigm / 生命计算范式 — PSI 认知架构数字生命体"
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.11"
 dependencies = [
     "cryptography>=41.0",
