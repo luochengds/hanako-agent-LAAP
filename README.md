@@ -3,6 +3,8 @@
 > 把 LAAP 数字生命体架构与 Hanako 桌面端融为一体的开源发行版。
 
 [![Build macOS DMG](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml)
+[![Build Windows Installer](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-windows.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-windows.yml)
+[![Build Linux Packages](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-linux.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-linux.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](hanako/LICENSE)
 
@@ -159,17 +161,19 @@ npm start
 
 ---
 
-## macOS 构建与打包
+## 跨平台构建与打包
 
-本仓库通过 GitHub Actions 自动构建 macOS DMG 安装包：
+本仓库通过 GitHub Actions 自动构建 macOS / Windows / Linux 安装包：
 
-- 工作流：[`.github/workflows/build-macos.yml`](.github/workflows/build-macos.yml)
-- 运行环境：`macos-latest`（Apple Silicon arm64）
-- 产物：`hanako/dist/HanaAgent LAAP-<version>-macOS-<arch>.dmg`
+| 平台 | 工作流 | 产物 |
+|------|--------|------|
+| macOS | [`.github/workflows/build-macos.yml`](.github/workflows/build-macos.yml) | `HanaAgent LAAP-<version>-macOS-<arch>.dmg` |
+| Windows | [`.github/workflows/build-windows.yml`](.github/workflows/build-windows.yml) | `HanaAgent LAAP-<version>-Windows-<arch>.exe` |
+| Linux | [`.github/workflows/build-linux.yml`](.github/workflows/build-linux.yml) | `HanaAgent LAAP-<version>-Linux-<arch>.AppImage` / `.deb` |
 
 每次推送至 `main` 分支或提交 Pull Request 时自动触发。构建产物可在对应 Action Run 的 **Artifacts** 中下载。
 
-> 说明：CI 使用一次性 Ed25519 密钥对签名 installer seed（`HANA_SIGN_KEY` / `HANA_SIGN_KEYSET`），并跳过 Apple 官方公证（`SKIP_NOTARIZE=true`）。如需发布正式版，请在仓库 Settings → Secrets 中配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`，并移除 `SKIP_NOTARIZE`，同时替换为正式签名密钥。
+> 说明：CI 使用一次性 Ed25519 密钥对签名 installer seed（`HANA_SIGN_KEY` / `HANA_SIGN_KEYSET`），并跳过 Apple 官方公证（`SKIP_NOTARIZE=true`）。Windows 与 Linux 安装包同样使用临时签名密钥。如需发布正式版，请在仓库 Settings → Secrets 中配置正式签名密钥；macOS 还需配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID` 并移除 `SKIP_NOTARIZE`。
 
 ---
 

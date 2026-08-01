@@ -1,0 +1,65 @@
+name: Build Linux Packages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    env:
+      SKIP_NOTARIZE: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: "npm"
+          cache-dependency-path: hanako/package-lock.json
+
+      - name: Generate throwaway artifact signing key
+        shell: bash
+        working-directory: ./hanako
+        run: |
+          node scripts/artifact-keygen.mjs --out /tmp/hana-sign.pem --key-id ci-laap-2026 > /tmp/keygen.json
+          node -e "const fs=require('fs'); const {keyId,publicKey}=JSON.parse(fs.readFileSync('/tmp/keygen.json','utf8')); fs.writeFileSync('/tmp/ci-keyset.json', JSON.stringify([{keyId,publicKey}]));"
+          echo "HANA_SIGN_KEY=/tmp/hana-sign.pem" >> $GITHUB_ENV
+          echo "HANA_SIGN_KEYSET=/tmp/ci-keyset.json" >> $GITHUB_ENV
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 libkrb5-dev libsecret-1-dev
+
+      - name: Install Hanako dependencies
+        working-directory: ./hanako
+        run: npm install
+
+      - name: Build Linux AppImage and deb
+        working-directory: ./hanako
+        run: npm run dist:linux -- --publish never
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hanako-linux-packages
+          path: hanako/dist/
+          if-no-files-found: warn
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-logs
+          path: |
+            hanako/dist/
+            /tmp/hana-*.log
+          if-no-files-found: ignore
