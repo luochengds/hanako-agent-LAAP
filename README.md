@@ -2,6 +2,7 @@
 
 > 把 LAAP 数字生命体架构与 Hanako 桌面端融为一体的开源发行版。
 
+[![Build macOS DMG](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](hanako/LICENSE)
 
@@ -149,11 +150,26 @@ npm start
 ├── scripts/             # LAAP 维护脚本（分支初始化、环境修复、人格植入）
 ├── skills/laap/         # LAAP 技能包元数据
 ├── docs/                # LAAP 官方文档
+├── .github/workflows/   # CI/CD（含 macOS DMG 自动构建）
 ├── ARIS_CHARTER.md      # Aris 宪章
 ├── LAAP_FORK_GUIDE.md   # Fork 与独立更新源指南
 ├── pyproject.toml       # LAAP Python 包配置
 └── requirements.txt     # Python 依赖
 ```
+
+---
+
+## macOS 构建与打包
+
+本仓库通过 GitHub Actions 自动构建 macOS DMG 安装包：
+
+- 工作流：[`.github/workflows/build-macos.yml`](.github/workflows/build-macos.yml)
+- 运行环境：`macos-latest`（Apple Silicon arm64）
+- 产物：`hanako/dist/HanaAgent LAAP-<version>-macOS-<arch>.dmg`
+
+每次推送至 `main` 分支或提交 Pull Request 时自动触发。构建产物可在对应 Action Run 的 **Artifacts** 中下载。
+
+> 说明：CI 使用一次性 Ed25519 密钥对签名 installer seed（`HANA_SIGN_KEY` / `HANA_SIGN_KEYSET`），并跳过 Apple 官方公证（`SKIP_NOTARIZE=true`）。如需发布正式版，请在仓库 Settings → Secrets 中配置 `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`，并移除 `SKIP_NOTARIZE`，同时替换为正式签名密钥。
 
 ---
 
