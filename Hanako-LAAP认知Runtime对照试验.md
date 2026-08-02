@@ -353,7 +353,7 @@ Hanako TypeScript 类型检查通过：
 npm run typecheck：通过
 ```
 
-仓库当前 `package.json` 没有 `build` script，因此 `npm run build` 返回 Missing script；这不是 TypeScript 类型错误，需按当前源码运行验收约定使用已有启动/构建入口。
+仓库当前 `package.json` 没有顶层 `build` script，因此 `npm run build` 返回 Missing script；实际源码客户端构建入口 `npm run build:client` 已通过（renderer、splash、theme 均完成）。
 
 ## Git 记录
 
