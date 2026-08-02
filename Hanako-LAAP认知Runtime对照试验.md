@@ -386,7 +386,7 @@ GET /agents/online（无 token）：401
 GET /agents/online（带 token）：成功
 ```
 
-结论：Sidecar、token 和 PSI gate 均正常；日志中的 `/agents/online 401` 是未带 Bearer token 的前端轮询问题，不是 `/before_turn`/`/after_turn` gate 失败。现已为 Desktop 主进程增加带 token 的 `get-sidecar-agents-online` IPC 代理，并让 app-init、App 和 BubbleField 优先使用该代理。
+结论：Sidecar、token 和 PSI gate 均正常；日志中的 `/agents/online 401` 是未带 Bearer token 的前端轮询问题，不是 `/before_turn`/`/after_turn` gate 失败。现已为 Desktop 主进程增加带 token 的 `get-sidecar-agents-online` IPC 代理，并让 app-init、App 和 BubbleField 优先使用该代理。Web Server 同时提供 `/api/sidecar/agents/online` 认证代理；`LAAP_COGNITIVE_RUNTIME=agi` 现在自动要求 PSI gate，即使未额外设置 `LAAP_PSI_GATE_REQUIRED=1`。
 
 ## Git 记录
 
