@@ -39,6 +39,7 @@ async function post(pathname: string, payload: Record<string, unknown>): Promise
     body: JSON.stringify(payload),
   });
   const body = await response.text();
+  console.log(`[laap-psi-gate] ${pathname} status=${response.status}`);
   let parsed: Record<string, unknown> = {};
   try { parsed = JSON.parse(body) as Record<string, unknown>; } catch { /* preserve status below */ }
   if (!response.ok) {
@@ -50,6 +51,7 @@ async function post(pathname: string, payload: Record<string, unknown>): Promise
 export async function beginLaapPsiTurn(input: unknown): Promise<LaapPsiTurnHandle | null> {
   if (!required()) return null;
   const text = typeof input === "string" ? input : JSON.stringify(input);
+  console.log(`[laap-psi-gate] begin required=true chars=${text.length}`);
   await post("/before_turn", { user_input: text });
   return { input: text, enabled: true };
 }
