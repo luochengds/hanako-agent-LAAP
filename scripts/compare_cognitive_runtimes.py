@@ -103,6 +103,17 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
 
     agi = AGIAgentCognitiveRuntime(AGIAgent(name="comparison-agi", state_dir=str(agi_state)))
     agi_result = _run_runtime("agi", agi, fixtures)
+
+    reloaded = AGIAgent(name="comparison-agi", state_dir=str(agi_state))
+    loaded = bool(reloaded.load())
+    restored_state = reloaded.get_state() if loaded else {}
+    agi_result["persistence"] = {
+        "supported": True,
+        "loaded": loaded,
+        "total_interactions": restored_state.get("total_interactions"),
+        "module_count": restored_state.get("module_count"),
+    }
+    bridge_result["persistence"] = {"supported": False}
     return {
         "version": 1,
         "fixture_count": len(fixtures),
