@@ -175,6 +175,16 @@ stable_summary_matches：True
 
 这确认恢复的不只是记忆计数，具体 episodic memory 内容也可以被重新检索。
 
+进一步加入 semantic 与 procedural 探针：
+
+```text
+semantic_probe_restored：True
+procedural_probe_restored：True
+second_reload_summary_matches：True
+```
+
+结果表明三类记忆都可恢复，且连续两次重载不会改变稳定摘要，当前实验未发现重复加载导致的状态膨胀。
+
 ## 当前判断
 
 从本轮指标看：

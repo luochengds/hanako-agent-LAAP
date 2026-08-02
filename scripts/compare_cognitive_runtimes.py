@@ -129,6 +129,15 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
     agi_result = _run_runtime("agi", agi, fixtures)
     memory_probe = "persistence probe unique memory marker"
     encoded_memory = agi.agent.unified_memory.encode_experience(memory_probe)
+    concept_probe = "persistence_concept_marker"
+    skill_probe = "persistence_skill_marker"
+    agi.agent.unified_memory.encode_concept(
+        concept_probe, "A concept used to verify semantic memory recovery"
+    )
+    agi.agent.unified_memory.encode_skill(
+        skill_probe, "Persistence verification skill", ["load", "verify"],
+        context_triggers=["persistence"],
+    )
     agi.agent.save()
 
     final_state = agi.agent.get_state()
@@ -139,6 +148,11 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
     memory_probe_restored = any(
         item.get("content") == memory_probe for item in restored_memory
     )
+    semantic_probe_restored = concept_probe in reloaded.unified_memory.semantic_memory.concepts if loaded else False
+    procedural_probe_restored = skill_probe in reloaded.unified_memory.procedural_memory.skills if loaded else False
+    second_reload = AGIAgent(name="comparison-agi", state_dir=str(agi_state)) if loaded else None
+    second_state = second_reload.get_state() if second_reload else {}
+    second_summary = _stable_state_summary(second_state) if second_reload else {}
     compare_keys = ("total_interactions", "world_model", "self_model", "causal", "conscious", "unified_memory", "cognitive_bus")
     state_matches = {
         key: final_state.get(key) == restored_state.get(key)
@@ -158,7 +172,10 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
         "memory_probe": {
             "episode_id": encoded_memory.get("episode_id"),
             "restored_query_match": memory_probe_restored,
+            "semantic_probe_restored": semantic_probe_restored,
+            "procedural_probe_restored": procedural_probe_restored,
             "restored_result_count": len(restored_memory),
+            "second_reload_summary_matches": second_summary == _stable_state_summary(restored_state),
         },
     }
     bridge_result["persistence"] = {"supported": False}
