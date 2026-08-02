@@ -35,6 +35,22 @@ BridgeCognitiveRuntime：兼容与显式回退，不自动静默切换。
 
 AGIAgent 失败时默认阻断，不自动降级，以避免主体认知状态无感变化。
 
+运行时策略：
+
+```text
+默认 → AGIAgent
+AGIAgent 初始化/运行失败 → 报错并阻断
+LAAP_COGNITIVE_RUNTIME=bridge → 使用 Bridge
+```
+
+未来如需容灾，只允许通过显式开关启用：
+
+```powershell
+$env:LAAP_RUNTIME_FALLBACK="bridge"
+```
+
+该开关未实现/未开启前，系统不会静默切换；启用后也必须记录告警和回退原因。
+
 ## 非阻断事项
 
 - HermesIntegration 当前不可用，原因是 `HERMES_ROOT` 指向的目录缺少 `run_agent.py`。
