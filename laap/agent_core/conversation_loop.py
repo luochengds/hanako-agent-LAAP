@@ -54,7 +54,7 @@ class ConversationLoop:
             
             # Call LLM
             response = self.agent.llm.chat(
-                self.agent.context.get_messages(),
+                self.agent.context.get_llm_messages(),
                 tools=self.agent.tool_mgr.get_openai_tools() if self.agent.config.enable_tools else []
             )
             turn.tokens_in += response.usage.get("prompt_tokens", 0)

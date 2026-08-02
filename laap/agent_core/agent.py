@@ -721,7 +721,7 @@ class Agent:
                 hqkv_prefix = ''
 
         # Build messages with optional H-QKV prefix
-        messages = self.context.get_messages()
+        messages = self.context.get_llm_messages()
         if hqkv_prefix:
             # Inject as a system-level instruction (not replacing original system)
             sys_msg = next((m for m in messages if hasattr(m, 'role') and m.role == 'system'), None)
@@ -734,7 +734,7 @@ class Agent:
             )
         try:
             if hasattr(self.llm, 'generate') and callable(self.llm.generate):
-                response = self.llm.generate(self.context.get_messages())
+                response = self.llm.generate(self.context.get_llm_messages())
                 if hasattr(response, '__await__'):
                     import asyncio
                     try:
@@ -749,11 +749,11 @@ class Agent:
                         response = asyncio.run(response)
             else:
                 from laap.agent_core.llm_provider import LLMResponse
-                resp = self.llm.chat(self.context.get_messages())
+                resp = self.llm.chat(self.context.get_llm_messages())
                 response = resp.content
         except Exception:
             from laap.agent_core.llm_provider import LLMResponse
-            resp = self.llm.chat(self.context.get_messages())
+            resp = self.llm.chat(self.context.get_llm_messages())
             response = resp.content
 
         response = response or "(空响应)"
@@ -849,7 +849,7 @@ class Agent:
         yield ("status", "thinking")
         full = ""
         try:
-            for token in self.llm.stream_chat(self.context.get_messages()):
+            for token in self.llm.stream_chat(self.context.get_llm_messages()):
                 full += token
                 yield ("token", token)
             self.context.add(Role.ASSISTANT, full)

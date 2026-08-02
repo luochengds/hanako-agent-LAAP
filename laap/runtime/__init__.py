@@ -1,0 +1,15 @@
+"""Stable LAAP runtime API.
+
+This package is the migration boundary for the canonical Agent runtime.
+Implementation remains in :mod:`laap.agent_core` during the compatibility
+migration; callers should import from ``laap.runtime`` going forward.
+"""
+
+from .agent import Agent, AgentConfig, AgentMode, AgentState, LAAPAgent
+from .contracts import AgentLifecycle, AgentRuntime
+from .adapter import AgentLifecycleAdapter
+
+__all__ = [
+    "Agent", "AgentConfig", "AgentMode", "AgentState", "LAAPAgent",
+    "AgentRuntime", "AgentLifecycle", "AgentLifecycleAdapter",
+]

@@ -18,9 +18,7 @@ import argparse, sys, os, json, logging, subprocess, time
 from typing import Any, Dict, List, Optional
 
 from laap import __version__
-from laap.agent.base import Agent, AgentConfig
-from laap.agent.lifelike import LifelikeAgent, LifelikeConfig
-from laap.agent.codex import CodexAgent, CodexConfig
+from laap.runtime.legacy import Agent, AgentConfig, LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
 from laap.llm.factory import LLMFactory
 from laap.cli.repl import LAAP_REPL
 from laap.cli.skins import render_logo, GOLD, GOLD_BRIGHT, GOLD_DIM, RESET, BOLD, SYM

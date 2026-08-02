@@ -158,9 +158,7 @@ else:
 
     @app.post("/agents/create")
     async def create_agent(req: CreateAgentRequest) -> Dict[str, Any]:
-        from laap.agent.base import Agent, AgentConfig
-        from laap.agent.lifelike import LifelikeAgent, LifelikeConfig
-        from laap.agent.codex import CodexAgent, CodexConfig
+        from laap.runtime.legacy import Agent, AgentConfig, LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
         if req.type == "codex":
             config = CodexConfig(name=req.name, workspace_dir=req.workspace)
             agent = CodexAgent(config=config, llm_factory=factory)
@@ -278,7 +276,7 @@ else:
     async def step_agent(agent_id: str, req: StepRequest) -> Dict[str, Any]:
         agent = agents.get(agent_id)
         if not agent: raise HTTPException(404, "Agent not found")
-        from laap.agent.lifelike import LifelikeAgent
+        from laap.runtime.legacy import LifelikeAgent
         if isinstance(agent, LifelikeAgent):
             return agent.step(req.observation, req.task_success)
         return {"error": "LifelikeAgent required for step"}

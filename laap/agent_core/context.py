@@ -106,6 +106,34 @@ class Context:
                 result.append({"role": "system", "content": msg.content})
         return result
     
+    def get_llm_messages(self, include_system: bool = True) -> List[Message]:
+        """Return Message objects for providers that call ``to_dict()``.
+
+        ``get_messages`` remains dict-compatible for existing compressors and
+        tests; provider calls must use this typed view.
+        """
+        result: List[Message] = []
+        if include_system and self.system_prompt:
+            result.append(Message(role=Role.SYSTEM, content=self.system_prompt))
+        for raw in self._messages:
+            if isinstance(raw, Message):
+                result.append(raw)
+                continue
+            if isinstance(raw, dict):
+                role = raw.get("role", Role.USER)
+                try:
+                    role = Role(role)
+                except ValueError:
+                    role = Role.USER
+                result.append(Message(
+                    role=role,
+                    content=raw.get("content", "") or "",
+                    tool_calls=raw.get("tool_calls", []) or [],
+                    tool_call_id=raw.get("tool_call_id", "") or "",
+                    name=raw.get("name", "") or "",
+                ))
+        return result
+
     def total_tokens(self) -> int:
         return sum(self._token_counts) + (self._token_counter(self.system_prompt) if self.system_prompt else 0)
     
