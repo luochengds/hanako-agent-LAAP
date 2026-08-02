@@ -312,7 +312,7 @@ export async function initApp(): Promise<void> {
   try {
     const sidecarData: { agents?: Array<{ public_key: string }> } | null = window.hana?.getSidecarAgentsOnline
       ? await window.hana.getSidecarAgentsOnline()
-      : await fetch('http://127.0.0.1:11521/agents/online').then((response) => response.ok ? response.json() : null);
+      : await fetch('/api/sidecar/agents/online').then((response) => response.ok ? response.json() : null);
     if (sidecarData) {
       // 仅当返回空列表时触发（Aris stub 在注册表为空时由 sidecar 兜底返回，
       // 故若 sidecar 返回 Aris stub 也说明注册表为空 → 触发诞生仪式）

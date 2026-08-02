@@ -129,7 +129,7 @@ export function BubbleField({
         const hana = (window as unknown as { hana?: { getSidecarAgentsOnline?: () => Promise<{ agents?: AgentOnline[] }> } }).hana;
         const data = (endpoint === "http://127.0.0.1:11521/agents/online" && hana?.getSidecarAgentsOnline)
           ? await hana.getSidecarAgentsOnline()
-          : await fetch(endpoint).then(async (resp) => {
+          : await fetch(endpoint === "http://127.0.0.1:11521/agents/online" ? "/api/sidecar/agents/online" : endpoint).then(async (resp) => {
               if (!resp.ok) return null;
               return await resp.json();
             });

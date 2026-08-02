@@ -44,6 +44,7 @@ import { createServerIdentityRoute } from "../routes/server-identity.ts";
 import { createResourcesRoute } from "../routes/resources.ts";
 import { createResourceIoRoute } from "../routes/resource-io.ts";
 import { createUsageRoute } from "../routes/usage.ts";
+import { createSidecarRoute } from "../routes/sidecar.ts";
 import { createWebAuthRoute } from "../routes/web-auth.ts";
 import { createWebSocketAuthRoute } from "../routes/ws-auth.ts";
 import { createStudioWorkspacesRoute } from "../routes/studio-workspaces.ts";
@@ -123,6 +124,7 @@ export function registerOpenRoutes(app: Hono, ctx: CompositionContext): void {
   app.route("/api", createResourceIoRoute(engine));
   app.route("/api", createResourcesRoute(engine));
   app.route("/api", createUsageRoute(engine));
+  app.route("/api", createSidecarRoute());
   app.route("/api", createSpeechRecognitionRoute(engine));
   app.route("/api", createServerIdentityRoute({
     hanakoHome: engine.hanakoHome,

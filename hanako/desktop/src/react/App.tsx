@@ -104,7 +104,7 @@ function App() {
     let cancelled = false;
     const agentsRequest = window.hana?.getSidecarAgentsOnline
       ? window.hana.getSidecarAgentsOnline()
-      : fetch('http://127.0.0.1:11521/agents/online').then((r) => (r.ok ? r.json() : null));
+      : fetch('/api/sidecar/agents/online').then((r) => (r.ok ? r.json() : null));
     agentsRequest.then((data) => {
         if (cancelled || !data?.agents) return;
         const self = data.agents.find(
