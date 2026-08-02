@@ -222,6 +222,15 @@ corrupt_state_does_not_raise：True
 
 `load()` 继续保持兼容，返回值表示主状态是否可读取；详细恢复质量通过 `get_state()["load_status"]` 获取。
 
+进一步验证损坏 sidecar：
+
+```text
+损坏 world_model.json：main_state=loaded，world_model=corrupt，degraded=True
+损坏 unified_memory.json：main_state=loaded，unified_memory=corrupt，degraded=True
+```
+
+sidecar 损坏不会再被误报为主状态损坏，也不会阻断其他状态层恢复。
+
 ## 当前判断
 
 从本轮指标看：

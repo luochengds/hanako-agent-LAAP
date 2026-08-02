@@ -802,15 +802,23 @@ class AGIAgent:
             world_path = load_path.parent / "world_model.json"
             if self.world is not None and callable(getattr(self.world, "load", None)):
                 if world_path.exists():
-                    result = self.world.load(str(world_path))
-                    self._last_load_status["world_model"] = "loaded" if result else "corrupt"
+                    try:
+                        result = self.world.load(str(world_path))
+                        self._last_load_status["world_model"] = "loaded" if result else "corrupt"
+                    except Exception as exc:
+                        self._last_load_status["world_model"] = "corrupt"
+                        logger.error(f"Failed to load world model: {exc}")
                 else:
                     self._last_load_status["world_model"] = "missing"
             memory_path = load_path.parent / "unified_memory.json"
             if self.unified_memory is not None:
                 if memory_path.exists():
-                    result = self.unified_memory.load(str(memory_path))
-                    self._last_load_status["unified_memory"] = "loaded" if result else "corrupt"
+                    try:
+                        result = self.unified_memory.load(str(memory_path))
+                        self._last_load_status["unified_memory"] = "loaded" if result else "corrupt"
+                    except Exception as exc:
+                        self._last_load_status["unified_memory"] = "corrupt"
+                        logger.error(f"Failed to load unified memory: {exc}")
                 else:
                     self._last_load_status["unified_memory"] = "missing"
             bus_path = load_path.parent / "cognitive_bus" / "cognitive_bus_state.json"
