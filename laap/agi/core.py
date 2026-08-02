@@ -279,6 +279,29 @@ class AGIAgent:
     # Main Interaction Pipeline
     # ════════════════════════════════════════════════════════
 
+    @staticmethod
+    def _run_async_from_sync(async_fn, *args, **kwargs):
+        """Run an async cognitive component from sync or async callers."""
+        import asyncio
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(async_fn(*args, **kwargs))
+
+        result = []
+        errors = []
+        def runner():
+            try:
+                result.append(asyncio.run(async_fn(*args, **kwargs)))
+            except Exception as exc:
+                errors.append(exc)
+        worker = threading.Thread(target=runner, name="laap-async-bridge", daemon=True)
+        worker.start()
+        worker.join()
+        if errors:
+            raise errors[0]
+        return result[0] if result else None
+
     def process_interaction(self, user_message: str,
                             domain: str = "general",
                             context: Dict[str, Any] = None,
@@ -354,9 +377,8 @@ class AGIAgent:
             # ─── Phase 0: Consciousness Harness Processing ───────
             if self.consciousness_harness:
                 try:
-                    import asyncio
-                    conscious_context = asyncio.run(
-                        self.consciousness_harness.process_input(user_message, ctx)
+                    conscious_context = self._run_async_from_sync(
+                        self.consciousness_harness.process_input, user_message, ctx
                     )
                     result["consciousness_harness"] = {
                         "mood": conscious_context.mood_label,

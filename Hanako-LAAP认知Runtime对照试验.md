@@ -336,6 +336,25 @@ canonical runtime untouched：True
 
 因此旧实现可以进入删除前的最后清理阶段；删除前仍需保留一个兼容性测试，确保外部不再直接依赖 `_legacy_process`。
 
+## 第十二轮结果：异步调用与构建验证
+
+在已有事件循环中调用同步 `AGIAgent.process_interaction()`，修复前会触发 `asyncio.run() cannot be called from a running event loop`，并丢失 Consciousness Harness。
+
+现已通过线程桥接修复：
+
+```text
+async response：True
+async consciousness_harness：True
+```
+
+Hanako TypeScript 类型检查通过：
+
+```text
+npm run typecheck：通过
+```
+
+仓库当前 `package.json` 没有 `build` script，因此 `npm run build` 返回 Missing script；这不是 TypeScript 类型错误，需按当前源码运行验收约定使用已有启动/构建入口。
+
 ## Git 记录
 
 对照试验工具及结果记录提交：
