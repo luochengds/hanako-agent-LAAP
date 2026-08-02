@@ -25,6 +25,7 @@ Integration:
 from __future__ import annotations
 
 import logging
+import threading
 
 from typing import Any, Dict, List, Optional, Tuple
 import time, logging
@@ -225,9 +226,46 @@ class PSIDriver:
         self._mesh: Optional[DirectionalMeshOrchestrator] = None
         self._mesh_initialized = False
 
+    def process_interaction(self, user_input: str, domain: str = "general",
+                            context: Optional[Dict[str, Any]] = None,
+                            action_outcome: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Run the canonical six-stage PSI transaction exactly once."""
+        lock = getattr(self.agent, "_psi_driver_lock", None)
+        if lock is None:
+            lock = threading.RLock()
+            self.agent._psi_driver_lock = lock
+        with lock:
+            if getattr(self.agent, "_psi_driver_active", False):
+                raise RuntimeError("PSIDriver re-entry detected; duplicate PSI cycle blocked")
+            self.agent._psi_driver_active = True
+            try:
+                result = self.agent._process_interaction_core(
+                    user_input,
+                    domain=domain,
+                    context=context,
+                    action_outcome=action_outcome,
+                    use_psi=True,
+                )
+            finally:
+                self.agent._psi_driver_active = False
+        self.cycle_count = getattr(self.agent, "total_interactions", self.cycle_count)
+        self.last_domain = domain
+        result["psi_driver"] = {
+            "canonical": True,
+            "cycle": self.cycle_count,
+            "phases": ["perceive", "select", "integrate", "act", "learn", "close"],
+            "implementation": "AGIAgent CognitiveBus core",
+        }
+        return result
+
     def process(self, user_input: str, domain: str = "general") -> str:
+        """Compatibility string API backed by the canonical transaction."""
+        result = self.process_interaction(user_input, domain=domain)
+        return str(result.get("response", ""))
+
+    def _legacy_process(self, user_input: str, domain: str = "general") -> str:
         """
-        Run one full PSI cognition cycle.
+        Legacy standalone PSI implementation retained only for migration comparison.
 
         Args:
             user_input: The user's natural language input
@@ -611,6 +649,16 @@ class PSIDriver:
 
         return chr(10).join(parts) if parts else "[Cognitive context: initializing]"
 
+    def learn(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Compatibility learning hook for tool/task integrations."""
+        data = payload if isinstance(payload, dict) else {"input": str(payload)}
+        self._learn(
+            str(data.get("input", data.get("user_input", ""))),
+            str(data.get("response", "")),
+            str(data.get("domain", "general")),
+        )
+        return {"learned": True, "canonical": True}
+
     def _learn(self, user_input: str, response: str, domain: str):
         """Post-interaction learning across all modules."""
         # Self-model learning
@@ -759,6 +807,7 @@ class PSIDriver:
             if hasattr(self.agent, m) and getattr(self.agent, m) is not None
         )
         stats = {
+            "canonical": True,
             "cycles": self.cycle_count,
             "domain": self.last_domain,
             "focus": self._last_focus,
@@ -782,9 +831,9 @@ def integrate_psi_driver(
     """
     Attach a PSI Driver to an AGIAgent instance.
 
-    Sets `agent.psi_driver` to the new PSIDriver instance. Existing
-    functionality is completely unaffected — the PSI driver is only
-    activated when `use_psi=True` is passed to process_interaction().
+    Sets `agent.psi_driver` to the canonical PSIDriver instance. Subject
+    turns enter this driver exactly once; the AGIAgent core remains the
+    cognitive module implementation behind the six-stage transaction.
 
     Args:
         agent: AGIAgent instance (or any object with the expected modules)

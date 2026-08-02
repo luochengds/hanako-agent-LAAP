@@ -207,6 +207,11 @@ class AGIAgent:
         self.cognitive_bus = CognitiveBus(agent_name=self.name)
         self._register_modules_on_bus()
 
+        # Canonical PSI orchestration boundary. The driver owns the turn
+        # transaction; this class owns the cognitive module implementation.
+        self.psi_driver = PSIDriver(self)
+        self._psi_driver_active = False
+
         # ── P0-1: 打通世界模型 ↔ 因果引擎的连接 ──
         # 原 AGIAgent 创建了 self.world 和 self.causal 但从未连接,
         # 导致 UnifiedWorldModel.predict 中的 self._causal_engine 永远为 None,
@@ -275,6 +280,33 @@ class AGIAgent:
     # ════════════════════════════════════════════════════════
 
     def process_interaction(self, user_message: str,
+                            domain: str = "general",
+                            context: Dict[str, Any] = None,
+                            action_outcome: Dict[str, Any] = None,
+                            use_psi: bool = True
+                            ) -> Dict[str, Any]:
+        """Canonical subject-turn entry owned by :class:`PSIDriver`."""
+        if getattr(self, "_psi_driver_active", False):
+            return self._process_interaction_core(
+                user_message, domain=domain, context=context,
+                action_outcome=action_outcome, use_psi=use_psi,
+            )
+        if not use_psi:
+            if os.environ.get("LAAP_ALLOW_PSI_BYPASS") != "1":
+                raise RuntimeError(
+                    "PSI bypass is disabled for subject interactions; "
+                    "set LAAP_ALLOW_PSI_BYPASS=1 only for explicitly classified infrastructure work."
+                )
+            return self._process_interaction_core(
+                user_message, domain=domain, context=context,
+                action_outcome=action_outcome, use_psi=False,
+            )
+        return self.psi_driver.process_interaction(
+            user_message, domain=domain, context=context,
+            action_outcome=action_outcome,
+        )
+
+    def _process_interaction_core(self, user_message: str,
                             domain: str = "general",
                             context: Dict[str, Any] = None,
                             action_outcome: Dict[str, Any] = None,
@@ -569,6 +601,34 @@ class AGIAgent:
                 )
                 self.cognitive_bus.module_heartbeat("conscious_stream")
 
+            # ════════════════════════════════════════════════════
+            # Phase 7.5: ACT — LLM is an expression channel only
+            # ════════════════════════════════════════════════════
+            response_text = ""
+            driver_llm = getattr(self.psi_driver, "llm", None)
+            if driver_llm is not None:
+                try:
+                    prompt = (
+                        (self.cognitive_bus.inject_cognitive_state_into_prompt() if self.cognitive_bus else "")
+                        + "\nUser: " + user_message
+                    )
+                    raw_response = driver_llm(prompt)
+                    response_text = raw_response.get("text", "") if isinstance(raw_response, dict) else str(raw_response)
+                except Exception as exc:
+                    logger.warning(f"PSI expression channel failed: {exc}")
+            if not response_text and self.hermes and getattr(self.hermes, "hermes_available", False):
+                try:
+                    raw_response = self.hermes.llm_call(
+                        (self.cognitive_bus.inject_cognitive_state_into_prompt() if self.cognitive_bus else "")
+                        + "\nUser: " + user_message
+                    )
+                    response_text = raw_response.get("text", "") if isinstance(raw_response, dict) else str(raw_response)
+                except Exception as exc:
+                    logger.warning(f"Hermes expression channel failed: {exc}")
+            if not response_text:
+                response_text = f"[PSI Driver - {domain}] Processed cycle {self.total_interactions}. No LLM channel available."
+            result["response"] = response_text
+
             # ─── Final bus tick ───
             if self.cognitive_bus:
                 final_snapshot = self.cognitive_bus.tick()
@@ -670,6 +730,16 @@ class AGIAgent:
             intensity=min(1.0, intensity),
             salience_map=salience,
         )
+        # Keep the conscious attention engine as a projection of the bus,
+        # rather than maintaining a second independent focus decision.
+        if self.conscious:
+            try:
+                self.conscious.focus_attention(
+                    AttentionFocus(new_focus.value),
+                    reason="canonical PSI driver selection",
+                )
+            except Exception as exc:
+                logger.debug(f"Conscious attention projection failed: {exc}")
 
     def get_state(self) -> Dict[str, Any]:
         """Get comprehensive agent state for introspection."""
@@ -709,6 +779,9 @@ class AGIAgent:
         if self.cognitive_bus:
             state["cognitive_bus"] = self.cognitive_bus.stats()
             state["cognitive_state_prompt"] = self.cognitive_bus.inject_cognitive_state_into_prompt()
+        if self.psi_driver:
+            state["psi_driver"] = self.psi_driver.stats()
+            state["psi_driver"]["canonical"] = True
         state["load_status"] = dict(self._last_load_status)
 
         # Autonomy: next action
@@ -799,6 +872,9 @@ class AGIAgent:
             self._last_load_status["main_state"] = "loaded"
 
             self.total_interactions = state.get("total_interactions", 0)
+            if self.psi_driver and isinstance(state.get("psi_driver"), dict):
+                self.psi_driver.cycle_count = state["psi_driver"].get("cycles", 0)
+                self.psi_driver.last_domain = state["psi_driver"].get("domain", "general")
             world_path = load_path.parent / "world_model.json"
             if self.world is not None and callable(getattr(self.world, "load", None)):
                 if world_path.exists():

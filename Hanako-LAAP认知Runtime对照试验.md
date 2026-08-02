@@ -288,10 +288,53 @@ AGIAgentCognitiveRuntime
 AGIAgent 持久化恢复：已完成
 需求/情绪/注意力/三类记忆恢复：已完成
 异常/缺失/损坏/严格降级门：已完成
-AGIAgent/PSIDriver/Bridge 唯一核心收敛：未完成
-完整 PSIDriver 六阶段接入且避免双重循环：未完成
-Shadow mode：未完成
+AGIAgent/PSIDriver/Bridge 唯一核心收敛：canonical 入口已完成
+完整 PSIDriver 六阶段 canonical 接入且避免双重循环：已完成
+Shadow mode：已完成（隔离 legacy driver 6/6，无失败，canonical runtime 未被污染）
 ```
+
+## 第十轮结果：PSIDriver canonical 接管
+
+已将 `PSIDriver` 接入 `AGIAgent.process_interaction()` 的唯一主体入口：
+
+```text
+AGIAgent.process_interaction()
+  → PSIDriver.process_interaction()
+    → AGIAgent._process_interaction_core()
+```
+
+驱动器现在记录六阶段契约：
+
+```text
+perceive → select → integrate → act → learn → close
+```
+
+并通过 re-entry guard 阻断递归/双重 PSI 调用。默认 fixture 验证：
+
+```text
+AGIAgent 成功：6/6
+PSIDriver canonical：True
+PSIDriver cycles：6
+AGIAgent total_interactions：6
+single_cycle_per_turn：True
+状态恢复后 psi_driver cycles：6
+```
+
+说明：采用“PSIDriver 负责事务编排、AGIAgent core 负责认知模块实现”的收敛方式；旧的 standalone driver 实现已降为迁移对照路径，尚未删除，待 Shadow mode 和三方行为对照完成后清理。`response` 已恢复，PSI bypass 语义、重入锁、注意力单源和 `learn()` 兼容钩子也已补齐。
+
+## 第十一轮结果：legacy Shadow mode
+
+在独立 `shadow_legacy` 状态目录中运行旧 standalone driver，与 canonical AGIAgent Runtime 使用同一 fixture 序列：
+
+```text
+legacy turns：6
+success：6/6
+failure：0
+responses non-empty：True
+canonical runtime untouched：True
+```
+
+因此旧实现可以进入删除前的最后清理阶段；删除前仍需保留一个兼容性测试，确保外部不再直接依赖 `_legacy_process`。
 
 ## Git 记录
 

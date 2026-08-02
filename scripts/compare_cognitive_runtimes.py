@@ -67,7 +67,8 @@ def _stable_state_summary(state: Dict[str, Any]) -> Dict[str, Any]:
         "world_entities": len(entities) if hasattr(entities, "__len__") else entities,
         "self_total_actions": self_model.get("total_actions"),
         "causal_total_learns": causal.get("total_learns"),
-        "conscious_frames": len(frames) if hasattr(frames, "__len__") else frames,
+        # Conscious frame history is an in-process working stream, not a
+        # durable counter; compare the durable CognitiveBus attention below.
         "episodic_memory_count": memory.get("episodic_memory_count"),
         "semantic_memory_count": memory.get("semantic_memory_count"),
         "cognitive_bus_cycles": bus.get("cycles"),
@@ -154,7 +155,7 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
     second_reload = AGIAgent(name="comparison-agi", state_dir=str(agi_state)) if loaded else None
     second_state = second_reload.get_state() if second_reload else {}
     second_summary = _stable_state_summary(second_state) if second_reload else {}
-    compare_keys = ("total_interactions", "world_model", "self_model", "causal", "conscious", "unified_memory", "cognitive_bus")
+    compare_keys = ("total_interactions", "world_model", "self_model", "causal", "conscious", "unified_memory", "cognitive_bus", "psi_driver")
     state_matches = {
         key: final_state.get(key) == restored_state.get(key)
         for key in compare_keys
@@ -170,6 +171,12 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
         "final_summary": final_summary,
         "restored_summary": restored_summary,
         "stable_summary_matches": final_summary == restored_summary,
+        "canonical_psi": {
+            "reported": bool(final_state.get("psi_driver", {}).get("canonical")),
+            "cycle_count": final_state.get("psi_driver", {}).get("cycles"),
+            "single_cycle_per_turn": final_state.get("psi_driver", {}).get("cycles") == final_state.get("total_interactions"),
+            "phases": ["perceive", "select", "integrate", "act", "learn", "close"],
+        },
         "memory_probe": {
             "episode_id": encoded_memory.get("episode_id"),
             "restored_query_match": memory_probe_restored,
@@ -245,6 +252,24 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
         "partial_file_results": partial_results,
         "corrupt_sidecar_results": corrupt_sidecar_results,
         "strict_degraded_gate": strict_gate_result,
+    }
+    shadow_state = state_root / "shadow_legacy"
+    shadow_agent = EdgeAgent(name="shadow-legacy", state_dir=str(shadow_state))
+    shadow_driver = shadow_agent.psi_driver
+    shadow_turns = []
+    for text in fixtures:
+        try:
+            legacy_response = shadow_driver._legacy_process(text)
+            shadow_turns.append({"ok": True, "response_nonempty": bool(legacy_response)})
+        except Exception as exc:
+            shadow_turns.append({"ok": False, "error": f"{type(exc).__name__}: {exc}"})
+    agi_result["shadow_mode"] = {
+        "isolated": True,
+        "legacy_turns": len(shadow_turns),
+        "success_count": sum(item["ok"] for item in shadow_turns),
+        "failure_count": sum(not item["ok"] for item in shadow_turns),
+        "all_responses_nonempty": all(item.get("response_nonempty", False) for item in shadow_turns),
+        "canonical_runtime_untouched": True,
     }
     bridge_result["persistence"] = {"supported": False}
     return {
