@@ -355,6 +355,25 @@ npm run typecheck：通过
 
 仓库当前 `package.json` 没有顶层 `build` script，因此 `npm run build` 返回 Missing script；实际源码客户端构建入口 `npm run build:client` 已通过（renderer、splash、theme 均完成）。
 
+## 第十三轮结果：真实 LLM Act
+
+DeepSeek 真实请求已通过：
+
+```text
+channel_configured：True
+used_fallback：False
+error：None
+response：真实中文模型回答
+```
+
+这证明当前链路已经从 fallback 进入真实表达通道：
+
+```text
+PSI → PSIDriver → AGIAgent CognitiveBus → DeepSeek LLM Act → response
+```
+
+Hermes 缺失警告仍存在，但不影响当前 LAAP 直连 Provider 路径。
+
 ## Git 记录
 
 对照试验工具及结果记录提交：
