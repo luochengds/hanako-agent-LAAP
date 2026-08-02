@@ -320,7 +320,7 @@ single_cycle_per_turn：True
 状态恢复后 psi_driver cycles：6
 ```
 
-说明：采用“PSIDriver 负责事务编排、AGIAgent core 负责认知模块实现”的收敛方式；旧的 standalone driver 实现已降为迁移对照路径，尚未删除，待 Shadow mode 和三方行为对照完成后清理。`response` 已恢复，PSI bypass 语义、重入锁、注意力单源和 `learn()` 兼容钩子也已补齐。
+说明：采用“PSIDriver 负责事务编排、AGIAgent core 负责认知模块实现”的收敛方式；旧的 standalone driver 实现已降为隔离迁移对照路径，暂不从源码删除。`response`、Act 阶段、PSI bypass 语义、重入锁、计数对齐、注意力单源、`learn()` 兼容钩子和 canonical latency 入口均已补齐。旧 per-hook latency 仅保留为 `_measure_legacy_latency()` 诊断工具。
 
 ## 第十一轮结果：legacy Shadow mode
 

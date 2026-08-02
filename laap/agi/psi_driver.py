@@ -9,8 +9,8 @@ Implements the PSI theory (Dietrich Dörner) cognition cycle:
   5. Learn    — update world model, self model, skills from outcomes
 
 The LLM becomes just the natural language I/O channel within this cycle,
-NOT the cognitive driver. This module is OPT-IN (use_psi=False by default)
-and NEVER breaks existing functionality.
+NOT the cognitive driver. This module is the canonical subject-turn
+orchestrator; explicit PSI bypass is reserved for classified maintenance work.
 
 Integration:
     from laap.agi.psi_driver import PSIDriver, integrate_psi_driver
@@ -261,7 +261,7 @@ class PSIDriver:
     def process(self, user_input: str, domain: str = "general") -> str:
         """Compatibility string API backed by the canonical transaction."""
         result = self.process_interaction(user_input, domain=domain)
-        return str(result.get("response", ""))
+        return str(result.get("response") or result.get("text") or "")
 
     def _legacy_process(self, user_input: str, domain: str = "general") -> str:
         """
@@ -492,15 +492,32 @@ class PSIDriver:
     #     may aggregate over large state.
     #   • Kakeya monitor (new): lightweight Counter update, negligible cost
     #
-    # measure_latency() does NOT modify process(). It temporarily wraps
-    # the callable entry points of each step with timers, runs one cycle,
-    # and restores the originals. perceive is derived by subtraction
-    # (it overlaps with several inline agent calls that cannot be
-    # wrapped without duplicating process()).
+    # Canonical measure_latency() reports transaction latency. The old
+    # per-hook instrumentation remains isolated in _measure_legacy_latency().
 
     def measure_latency(
         self, user_input: str = "measure", domain: str = "general"
+    ) -> Dict[str, Any]:
+        """Measure the canonical transaction without re-running legacy hooks."""
+        import time as _time
+        started = _time.perf_counter()
+        self.process_interaction(user_input, domain=domain)
+        total_ms = (_time.perf_counter() - started) * 1000.0
+        return {
+            "perceive_ms": None,
+            "select_ms": None,
+            "integrate_ms": None,
+            "decide_ms": None,
+            "learn_ms": None,
+            "total_ms": round(total_ms, 3),
+            "canonical": True,
+            "phase_timings_supported": False,
+        }
+
+    def _measure_legacy_latency(
+        self, user_input: str = "measure", domain: str = "general"
     ) -> Dict[str, float]:
+        """Legacy-only instrumentation retained for migration diagnostics."""
         """Time each step of one PSI cognition cycle.
 
         Wraps the callable entry points of perceive/select/integrate/
