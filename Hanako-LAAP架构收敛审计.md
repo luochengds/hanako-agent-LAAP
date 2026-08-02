@@ -252,6 +252,10 @@ Hanako 核心：76 passed
 安全测试：43 passed
 ```
 
+## 统一认知 Runtime 第一阶段
+
+新增 `laap/runtime/cognitive_runtime.py`，定义统一的 `CognitiveRuntime`、`CognitiveTurn` 和当前 `LaapBridge` 的 `BridgeCognitiveRuntime` 适配器。`PSITurnGateway` 已改为优先使用该认知事务接口，为后续接入 `AGIAgent` 或阶段化 `PSIDriver` 提供唯一切换点。
+
 ## 当前结论
 
 架构叠层是真实存在的，但不是当前源码运行阻断。

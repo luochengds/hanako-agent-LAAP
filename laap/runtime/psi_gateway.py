@@ -22,6 +22,7 @@ class PSITurnReceipt:
     started_at: float = field(default_factory=time.time)
     finished_at: Optional[float] = None
     status: str = "started"
+    cognitive_turn: Any = None
 
 
 class PSITurnGateway:
@@ -76,21 +77,28 @@ class PSITurnGateway:
     @classmethod
     def default(cls) -> "PSITurnGateway":
         from laap.agent.laap_bridge import get_bridge
+        from .cognitive_runtime import BridgeCognitiveRuntime
 
-        driver = get_bridge()
-        if not driver.initialize():
+        bridge = get_bridge()
+        if not bridge.initialize():
             raise RuntimeError("PSI gateway initialization failed")
-        return cls(driver)
+        return cls(BridgeCognitiveRuntime(bridge))
 
     def _before(self, user_input: str) -> PSITurnReceipt:
         self._turn_count += 1
-        context = self.driver.before_turn(user_input)
+        cognitive_turn = None
+        if hasattr(self.driver, "begin_turn"):
+            cognitive_turn = self.driver.begin_turn(user_input)
+            context = getattr(cognitive_turn, "context", {})
+        else:
+            context = self.driver.before_turn(user_input)
         if not isinstance(context, dict):
             context = {"result": context}
         receipt = PSITurnReceipt(
             turn_id=self._turn_count,
             user_input=user_input,
             context=context,
+            cognitive_turn=cognitive_turn,
         )
         self.last_receipt = receipt
         return receipt
@@ -99,7 +107,10 @@ class PSITurnGateway:
         receipt.output_seen = True
         receipt.finished_at = time.time()
         receipt.status = "completed"
-        self.driver.after_turn(str(output))
+        if hasattr(self.driver, "complete_turn"):
+            self.driver.complete_turn(receipt.cognitive_turn, str(output))
+        else:
+            self.driver.after_turn(str(output))
         self._persist_receipt(receipt, output)
         return output
 
@@ -133,7 +144,10 @@ class PSITurnGateway:
             receipt.output_seen = True
             receipt.finished_at = time.time()
             receipt.status = "completed"
-            self.driver.after_turn(output)
+            if hasattr(self.driver, "complete_turn"):
+                self.driver.complete_turn(receipt.cognitive_turn, output)
+            else:
+                self.driver.after_turn(output)
             self._persist_receipt(receipt, output)
 
 
