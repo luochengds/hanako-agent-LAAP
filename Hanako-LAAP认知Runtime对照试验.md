@@ -185,6 +185,19 @@ second_reload_summary_matches：True
 
 结果表明三类记忆都可恢复，且连续两次重载不会改变稳定摘要，当前实验未发现重复加载导致的状态膨胀。
 
+## 第七轮结果：异常与重复写入
+
+异常探针结果：
+
+```text
+duplicate_memory_count_after_reload：2
+duplicate_write_is_append_semantics：True
+corrupt_main_state_load_result：False
+corrupt_state_does_not_raise：True
+```
+
+结论：重复写入当前是明确的 append 语义，而不是自动去重；损坏的主状态文件会返回加载失败，但不会向调用方抛出异常。后续需要决定是否增加记忆内容去重策略，以及是否提供更明确的 degraded recovery 状态。
+
 ## 当前判断
 
 从本轮指标看：

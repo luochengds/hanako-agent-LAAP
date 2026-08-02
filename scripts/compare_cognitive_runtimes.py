@@ -178,6 +178,31 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
             "second_reload_summary_matches": second_summary == _stable_state_summary(restored_state),
         },
     }
+    edge_root = state_root / "edge_cases"
+    edge_root.mkdir(parents=True, exist_ok=True)
+    from laap.agi.core import AGIAgent as EdgeAgent
+    duplicate_agent = EdgeAgent(name="duplicate-probe", state_dir=str(edge_root / "duplicate"))
+    duplicate_text = "duplicate memory idempotence probe"
+    duplicate_agent.unified_memory.encode_experience(duplicate_text)
+    duplicate_agent.unified_memory.encode_experience(duplicate_text)
+    duplicate_agent.save()
+    duplicate_reload = EdgeAgent(name="duplicate-probe", state_dir=str(edge_root / "duplicate"))
+    duplicate_count = sum(
+        item.content == duplicate_text
+        for item in duplicate_reload.unified_memory.episodic_memory.episodes
+    )
+
+    corrupt_dir = edge_root / "corrupt"
+    corrupt_dir.mkdir(parents=True, exist_ok=True)
+    (corrupt_dir / "agi_state.json").write_text("{not valid json", encoding="utf-8")
+    corrupt_agent = EdgeAgent(name="corrupt-probe", state_dir=str(corrupt_dir))
+    corrupt_load_result = bool(corrupt_agent.load())
+    agi_result["persistence_edge_cases"] = {
+        "duplicate_memory_count_after_reload": duplicate_count,
+        "duplicate_write_is_append_semantics": duplicate_count == 2,
+        "corrupt_main_state_load_result": corrupt_load_result,
+        "corrupt_state_does_not_raise": True,
+    }
     bridge_result["persistence"] = {"supported": False}
     return {
         "version": 1,
