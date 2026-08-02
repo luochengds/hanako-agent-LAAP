@@ -3,11 +3,13 @@
 仓库提供统一依赖引导脚本：
 
 ```bat
-REM Windows CMD / 双击入口
-scripts\bootstrap.bat
-scripts\bootstrap.bat --with-dev
-scripts\bootstrap.bat --dry-run
+REM Windows CMD / 双击入口（仓库根目录）
+自动安装依赖.bat
+自动安装依赖.bat --with-dev
+自动安装依赖.bat --dry-run
 ```
+
+底层入口仍位于 `scripts\\bootstrap.bat`，根目录中文 BAT 只是统一启动入口。
 
 也可以使用 PowerShell：
 
