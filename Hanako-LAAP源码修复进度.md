@@ -311,6 +311,22 @@ chat_stream()
 
 当前为第一阶段硬门控：默认调用 `LaapBridge`，完整 `laap_brain` 不存在时使用 fallback cognitive kernel；Codex/Lifelike 兼容分支也已通过 `wrap_runtime_agent()` 接入。Hanako Desktop 的 `prompt()` / `promptSession()` 已增加 Sidecar gate，设置 `LAAP_PSI_GATE_REQUIRED=1` 后进入严格模式。真实 Sidecar 联动探针已通过：`/before_turn`、`/after_turn` 均返回 HTTP 200；尚未统一接入 `laap.agi.PSIDriver` 六阶段循环。
 
+## PSI 绕过例外
+
+默认不设置任何变量时，PSI 不可绕过。仅限分类后的基础设施维护时，才在当前 PowerShell 会话中显式设置：
+
+```powershell
+$env:LAAP_ALLOW_PSI_BYPASS="1"
+```
+
+维护完成后立即清除：
+
+```powershell
+Remove-Item Env:LAAP_ALLOW_PSI_BYPASS
+```
+
+该变量不是普通聊天、工具调用、记忆写入或 RSI 的运行开关，不应永久设置。
+
 ## 上传状态
 
 当前工作区仍是修复中的源码工作区，尚未作为最终稳定版本上传。

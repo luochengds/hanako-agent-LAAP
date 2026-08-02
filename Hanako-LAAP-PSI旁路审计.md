@@ -68,7 +68,7 @@ laap/domain_sdks/finquant/agent/conversation.py
 ## 后续动作
 
 1. 禁止新的公共 Agent 直接导出 LLM 调用；
-2. `AGIAgent.process_interaction(use_psi=False)` 已默认阻断，只有显式 `LAAP_ALLOW_PSI_BYPASS=1` 才能用于分类后的基础设施工作；
+2. `AGIAgent.process_interaction(use_psi=False)` 已默认阻断；只有在 PowerShell 中显式执行 `$env:LAAP_ALLOW_PSI_BYPASS="1"` 才能用于分类后的基础设施工作，完成后应执行 `Remove-Item Env:LAAP_ALLOW_PSI_BYPASS` 清除；
 3. 为领域 SDK 增加 Runtime 适配器后再纳入主体路径；
 4. 逐步将完整 `laap.agi.PSIDriver` 接入 canonical Runtime；
 5. 保持所有旁路调用有明确的实验/基础设施归类。
