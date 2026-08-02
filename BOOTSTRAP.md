@@ -11,6 +11,12 @@ REM Windows CMD / 双击入口（仓库根目录）
 
 底层入口仍位于 `scripts\\bootstrap.bat`，根目录中文 BAT 只是统一启动入口。
 
+安装完成后，想要像 Desktop 一样启动：
+
+```bat
+启动桌面.bat
+```
+
 也可以使用 PowerShell：
 
 ```powershell
