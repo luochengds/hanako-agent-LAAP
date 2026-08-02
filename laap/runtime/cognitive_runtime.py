@@ -59,9 +59,13 @@ class AGIAgentCognitiveRuntime:
     without running a second PSI cycle for the same user turn.
     """
 
-    def __init__(self, agent: Any):
+    def __init__(self, agent: Any, *, strict_persistence: bool | None = None):
         self.agent = agent
         self._turn_count = 0
+        self.strict_persistence = (
+            os.environ.get("LAAP_PERSISTENCE_STRICT", "0") == "1"
+            if strict_persistence is None else strict_persistence
+        )
 
     @classmethod
     def create(cls, *, name: str = "LAAP-Agent") -> "AGIAgentCognitiveRuntime":
@@ -77,6 +81,12 @@ class AGIAgentCognitiveRuntime:
         return cls(AGIAgent(name=name, state_dir=state_dir))
 
     def begin_turn(self, user_input: str) -> CognitiveTurn:
+        load_status = getattr(self.agent, "_last_load_status", {}) or {}
+        if self.strict_persistence and load_status.get("degraded", False):
+            raise RuntimeError(
+                "AGIAgent persistence is degraded; strict runtime blocks the subject turn: "
+                f"{load_status}"
+            )
         self._turn_count += 1
         report = self.agent.process_interaction(user_input, use_psi=True)
         if not isinstance(report, dict):

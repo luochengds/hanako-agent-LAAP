@@ -201,6 +201,7 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
 
     partial_results = {}
     corrupt_sidecar_results = {}
+    strict_gate_result = None
     complete_state = edge_root / "complete"
     complete_agent = EdgeAgent(name="partial-probe", state_dir=str(complete_state))
     complete_agent.unified_memory.encode_experience("partial recovery marker")
@@ -217,6 +218,16 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
             "bus_cycles": loaded_agent.get_state().get("cognitive_bus", {}).get("cycles"),
             "world_entities": len(loaded_agent.world.entities),
         }
+    strict_case = edge_root / "strict_missing_memory"
+    shutil.copytree(complete_state, strict_case, dirs_exist_ok=True)
+    (strict_case / "unified_memory.json").unlink(missing_ok=True)
+    strict_agent = EdgeAgent(name="strict-probe", state_dir=str(strict_case))
+    try:
+        AGIAgentCognitiveRuntime(strict_agent, strict_persistence=True).begin_turn("strict gate probe")
+        strict_gate_result = "allowed"
+    except RuntimeError:
+        strict_gate_result = "blocked"
+
     for corrupt_name in ("world_model.json", "unified_memory.json"):
         case_dir = edge_root / ("corrupt_" + corrupt_name.replace("/", "_"))
         shutil.copytree(complete_state, case_dir, dirs_exist_ok=True)
@@ -233,6 +244,7 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
         "corrupt_state_does_not_raise": True,
         "partial_file_results": partial_results,
         "corrupt_sidecar_results": corrupt_sidecar_results,
+        "strict_degraded_gate": strict_gate_result,
     }
     bridge_result["persistence"] = {"supported": False}
     return {

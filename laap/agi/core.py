@@ -788,7 +788,7 @@ class AGIAgent:
             "world_model": "missing",
             "unified_memory": "missing",
             "cognitive_bus": "missing",
-            "degraded": True,
+            "degraded": bool(load_path and load_path.exists()),
         }
         if not load_path or not load_path.exists():
             return False

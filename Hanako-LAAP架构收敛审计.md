@@ -254,7 +254,7 @@ Hanako 核心：76 passed
 
 ## 统一认知 Runtime 第一阶段
 
-新增 `laap/runtime/cognitive_runtime.py`，定义统一的 `CognitiveRuntime`、`CognitiveTurn`、当前 `LaapBridge` 的 `BridgeCognitiveRuntime` 适配器，以及可选的 `AGIAgentCognitiveRuntime`。设置 `LAAP_COGNITIVE_RUNTIME=agi` 后，PSI Gateway 会使用 `AGIAgent.process_interaction(use_psi=True)`；真实探针已通过并返回完整认知报告。新增 `scripts/compare_cognitive_runtimes.py`，可在隔离状态目录中对同一批 fixture 做 Bridge/AGIAgent 离线 A/B 比较。第二版已加入 needs/attention 首末状态差异；默认 fixture 两者均 6/6 成功，AGIAgent 返回完整认知状态并产生可观测需求/注意力变化。第三版加入隔离 state_dir 重载验证；初次发现世界模型/CognitiveBus 稳定摘要未完全恢复，已补齐 AGIAgent CognitiveBus 持久化和 AbstractWorldModel save/load façade。修复后 AGIAgent 6 次 interaction 可成功 load，stable summary 恢复一致；进一步补齐 AttentionState.top_salient 的加载，needs/emotion/attention 完整认知状态比较为一致。Bridge 标记为无持久化能力。默认仍使用 Bridge，避免一次性改变生产后端。
+新增 `laap/runtime/cognitive_runtime.py`，定义统一的 `CognitiveRuntime`、`CognitiveTurn`、当前 `LaapBridge` 的 `BridgeCognitiveRuntime` 适配器，以及可选的 `AGIAgentCognitiveRuntime`。设置 `LAAP_COGNITIVE_RUNTIME=agi` 后，PSI Gateway 会使用 `AGIAgent.process_interaction(use_psi=True)`；真实探针已通过并返回完整认知报告。新增 `scripts/compare_cognitive_runtimes.py`，可在隔离状态目录中对同一批 fixture 做 Bridge/AGIAgent 离线 A/B 比较。第二版已加入 needs/attention 首末状态差异；默认 fixture 两者均 6/6 成功，AGIAgent 返回完整认知状态并产生可观测需求/注意力变化。第三版加入隔离 state_dir 重载验证；初次发现世界模型/CognitiveBus 稳定摘要未完全恢复，已补齐 AGIAgent CognitiveBus 持久化和 AbstractWorldModel save/load façade。修复后 AGIAgent 6 次 interaction 可成功 load，stable summary 恢复一致；进一步补齐 AttentionState.top_salient 的加载，needs/emotion/attention 完整认知状态比较为一致。Bridge 标记为无持久化能力。已增加 `load_status` 结构化恢复质量和 `LAAP_PERSISTENCE_STRICT=1` 严格降级门；已有主状态但 sidecar 缺失/损坏时严格模式阻断主体 turn，默认仍使用 Bridge，避免一次性改变生产后端。
 
 ## 当前结论
 

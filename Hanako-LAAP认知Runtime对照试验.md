@@ -231,6 +231,30 @@ corrupt_state_does_not_raise：True
 
 sidecar 损坏不会再被误报为主状态损坏，也不会阻断其他状态层恢复。
 
+## 第九轮结果：严格降级门
+
+统一 `AGIAgentCognitiveRuntime` 新增严格持久化模式：
+
+```powershell
+$env:LAAP_PERSISTENCE_STRICT="1"
+```
+
+或在代码中显式创建：
+
+```python
+AGIAgentCognitiveRuntime(agent, strict_persistence=True)
+```
+
+当 `load_status.degraded=True` 时，主体 turn 会被阻断；完整状态时正常放行。
+
+实验结果：
+
+```text
+缺失 unified_memory.json：blocked
+```
+
+默认模式仍保持兼容，不会因为首次启动没有历史状态而阻断；严格模式只针对已有主状态但 sidecar 缺失或损坏的情况生效。
+
 ## 当前判断
 
 从本轮指标看：
