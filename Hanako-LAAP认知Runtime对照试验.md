@@ -374,6 +374,20 @@ PSI → PSIDriver → AGIAgent CognitiveBus → DeepSeek LLM Act → response
 
 Hermes 缺失警告仍存在，但不影响当前 LAAP 直连 Provider 路径。
 
+## 第十四轮结果：Sidecar gate 实测
+
+已从本机直接读取持久化 token，并实际请求运行中的 Sidecar：
+
+```text
+GET /health：200
+POST /before_turn：成功
+POST /after_turn：成功
+GET /agents/online（无 token）：401
+GET /agents/online（带 token）：成功
+```
+
+结论：Sidecar、token 和 PSI gate 均正常；日志中的 `/agents/online 401` 是未带 Bearer token 的前端轮询问题，不是 `/before_turn`/`/after_turn` gate 失败。
+
 ## Git 记录
 
 对照试验工具及结果记录提交：
