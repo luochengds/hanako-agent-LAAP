@@ -1,0 +1,166 @@
+# Hanako-LAAP 认知 Runtime 对照试验
+
+更新时间：2026-08-02
+
+## 试验目的
+
+比较当前两套认知 Runtime：
+
+```text
+BridgeCognitiveRuntime
+AGIAgentCognitiveRuntime
+```
+
+确认哪一套更适合作为后续唯一主体认知核心。
+
+## 试验原则
+
+- 两套 Runtime 接收完全相同的输入 fixture；
+- 使用隔离的 AGIAgent state_dir；
+- 不调用真实 LLM；
+- 不修改生产记忆和生产状态；
+- 比较认知报告、需求变化、注意力变化和状态恢复；
+- 不把语言表达质量混入本轮认知引擎比较。
+
+## 运行工具
+
+```text
+scripts/compare_cognitive_runtimes.py
+```
+
+运行：
+
+```powershell
+cd E:\worke\hanako-agent-LAAP
+.\.venv\Scripts\python.exe scripts/compare_cognitive_runtimes.py `
+  --output "$env:TEMP\laap-cognitive-compare.json"
+```
+
+## 默认输入样本
+
+共 6 条：
+
+1. 普通问候与自我介绍；
+2. 系统风险分析；
+3. 焦虑情绪表达；
+4. 记忆主体性原则；
+5. 工具失败处理；
+6. 安全自我改进建议。
+
+## 第一轮结果：基础成功率
+
+```text
+Bridge：6/6 成功
+AGIAgent：6/6 成功
+```
+
+## 第二轮结果：认知状态变化
+
+### Bridge
+
+返回状态主要包括：
+
+```text
+meta
+parliament
+unity
+version
+```
+
+默认 fallback 下没有可比较的完整需求/注意力状态变化。
+
+### AGIAgent
+
+返回：
+
+```text
+cognitive_state
+needs
+emotion
+attention
+conscious
+causal
+autonomy
+self_assessment
+prediction
+```
+
+需求首末变化：
+
+```text
+competence：-0.003
+autonomy：-0.002
+relatedness：-0.007
+certainty：-0.014
+growth：+0.007
+```
+
+注意力：
+
+```text
+首轮：learning
+末轮：task
+```
+
+结论：AGIAgent 产生了可观测的需求和注意力变化；Bridge fallback 主要提供基础认知桥接状态。
+
+## 第三轮结果：状态恢复
+
+AGIAgent 在隔离目录中运行 6 次 interaction 后：
+
+```text
+保存状态：成功
+新实例加载：成功
+total_interactions：6
+```
+
+Bridge：
+
+```text
+无独立 AGIAgent 状态恢复能力
+```
+
+结论：AGIAgent 已具备可验证的状态持久化和重载能力。
+
+## 当前判断
+
+从本轮指标看：
+
+```text
+BridgeCognitiveRuntime
+  优点：轻量、兼容、启动快、风险低
+  缺点：fallback 认知状态较少，持续状态能力弱
+
+AGIAgentCognitiveRuntime
+  优点：认知模块完整，需求/情绪/注意力可观测，支持状态恢复
+  缺点：初始化更重，依赖更多，尚未完成生产默认切换
+```
+
+当前推荐：
+
+```text
+生产默认：暂时保持 Bridge
+认知验证：使用 AGIAgent
+下一阶段：继续做 shadow mode 和状态一致性验证
+```
+
+## 尚未完成的试验
+
+- 恢复前后需求状态精确一致性；
+- 恢复前后情绪状态精确一致性；
+- 恢复前后注意力状态精确一致性；
+- 长期记忆重复写入检查；
+- 异常输入和工具失败场景；
+- Shadow mode 双跑；
+- 真实模型输出的一致性与安全性；
+- 完整 `PSIDriver` 与 AGIAgent 的阶段化对照。
+
+## Git 记录
+
+对照试验工具及结果记录提交：
+
+```text
+e304445  test: add cognitive runtime comparison harness
+844cfcf  test: compare cognitive state deltas
+0b2016d  test: compare cognitive runtime state recovery
+```
