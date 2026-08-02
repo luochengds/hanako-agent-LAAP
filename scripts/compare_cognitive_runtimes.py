@@ -127,11 +127,18 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
 
     agi = AGIAgentCognitiveRuntime(AGIAgent(name="comparison-agi", state_dir=str(agi_state)))
     agi_result = _run_runtime("agi", agi, fixtures)
+    memory_probe = "persistence probe unique memory marker"
+    encoded_memory = agi.agent.unified_memory.encode_experience(memory_probe)
+    agi.agent.save()
 
     final_state = agi.agent.get_state()
     reloaded = AGIAgent(name="comparison-agi", state_dir=str(agi_state))
     loaded = bool(reloaded.load())
     restored_state = reloaded.get_state() if loaded else {}
+    restored_memory = reloaded.unified_memory.query("unique memory marker") if loaded else []
+    memory_probe_restored = any(
+        item.get("content") == memory_probe for item in restored_memory
+    )
     compare_keys = ("total_interactions", "world_model", "self_model", "causal", "conscious", "unified_memory", "cognitive_bus")
     state_matches = {
         key: final_state.get(key) == restored_state.get(key)
@@ -148,6 +155,11 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
         "final_summary": final_summary,
         "restored_summary": restored_summary,
         "stable_summary_matches": final_summary == restored_summary,
+        "memory_probe": {
+            "episode_id": encoded_memory.get("episode_id"),
+            "restored_query_match": memory_probe_restored,
+            "restored_result_count": len(restored_memory),
+        },
     }
     bridge_result["persistence"] = {"supported": False}
     return {

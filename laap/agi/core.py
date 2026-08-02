@@ -757,6 +757,8 @@ class AGIAgent:
 
         if self.world is not None and callable(getattr(self.world, "save", None)):
             self.world.save(str(save_path.parent / "world_model.json"))
+        if self.unified_memory is not None:
+            self.unified_memory.save(str(save_path.parent / "unified_memory.json"))
         if self.cognitive_bus is not None:
             self.cognitive_bus.save_state()
 
@@ -783,6 +785,8 @@ class AGIAgent:
             self.total_interactions = state.get("total_interactions", 0)
             if self.world is not None and callable(getattr(self.world, "load", None)):
                 self.world.load(str(load_path.parent / "world_model.json"))
+            if self.unified_memory is not None:
+                self.unified_memory.load(str(load_path.parent / "unified_memory.json"))
 
             # Restore self-knowledge to self-model
             if self.self_model and "self_knowledge" in state:

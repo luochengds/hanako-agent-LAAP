@@ -158,6 +158,23 @@ stable_summary_matches：True
 
 本轮发现并修复一个细节：注意力的 `top_salient` 在保存后被写出，但加载时没有恢复到 `salience_map`。修复后注意力状态实现完整恢复。
 
+## 第五轮结果：长期记忆内容恢复
+
+新增唯一记忆探针：
+
+```text
+persistence probe unique memory marker
+```
+
+AGIAgent 保存并重载后，通过 `UnifiedMemory.query()` 检索：
+
+```text
+restored_query_match：True
+stable_summary_matches：True
+```
+
+这确认恢复的不只是记忆计数，具体 episodic memory 内容也可以被重新检索。
+
 ## 当前判断
 
 从本轮指标看：

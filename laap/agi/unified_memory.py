@@ -12,6 +12,7 @@ Provides a simplified, high-level API for memory operations.
 
 from __future__ import annotations
 
+import json
 import time
 import math
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -405,6 +406,80 @@ class UnifiedMemory:
 
     def get_dream_report(self, recent_count: int = 5) -> List[str]:
         return self.consolidator.get_dream_report(recent_count=recent_count)
+
+    def save(self, path: str) -> None:
+        """Persist memory content for cross-process recovery."""
+        payload = {
+            "working_memory": list(self.working_memory),
+            "emotional_state": self.emotional_state,
+            "episodes": [
+                {
+                    "trace_id": item.trace_id,
+                    "memory_type": item.memory_type.value,
+                    "content": item.content,
+                    "timestamp": item.timestamp,
+                    "emotional_valence": item.emotional_valence,
+                    "emotional_arousal": item.emotional_arousal,
+                    "rehearsal_count": item.rehearsal_count,
+                    "last_accessed": item.last_accessed,
+                    "associations": item.associations,
+                    "source_episode": item.source_episode,
+                    "confidence": item.confidence,
+                    "decay_rate": item.decay_rate,
+                }
+                for item in self.episodic_memory.episodes
+            ],
+            "concepts": self.semantic_memory.concepts,
+            "relations": {
+                key: [list(value) for value in values]
+                for key, values in self.semantic_memory.relations.items()
+            },
+            "skills": self.procedural_memory.skills,
+            "habits": self.procedural_memory.habits,
+            "consolidation_count": self.consolidator.consolidation_count,
+            "dream_reports": list(self.consolidator.dream_reports),
+        }
+        from pathlib import Path
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+    def load(self, path: str) -> bool:
+        """Restore memory content saved by :meth:`save`."""
+        from pathlib import Path
+        target = Path(path)
+        if not target.exists():
+            return False
+        payload = json.loads(target.read_text(encoding="utf-8"))
+        self.working_memory.clear()
+        self.working_memory.extend(payload.get("working_memory", []))
+        self.emotional_state = dict(payload.get("emotional_state", self.emotional_state))
+        self.episodic_memory.episodes = [
+            MemoryTrace(
+                trace_id=item["trace_id"],
+                memory_type=MemoryType(item.get("memory_type", MemoryType.EPISODIC.value)),
+                content=item.get("content", ""),
+                timestamp=item.get("timestamp", time.time()),
+                emotional_valence=item.get("emotional_valence", 0.0),
+                emotional_arousal=item.get("emotional_arousal", 0.0),
+                rehearsal_count=item.get("rehearsal_count", 0),
+                last_accessed=item.get("last_accessed", time.time()),
+                associations=item.get("associations", []),
+                source_episode=item.get("source_episode"),
+                confidence=item.get("confidence", 0.5),
+                decay_rate=item.get("decay_rate", 0.01),
+            )
+            for item in payload.get("episodes", [])
+        ]
+        self.semantic_memory.concepts = dict(payload.get("concepts", {}))
+        self.semantic_memory.relations.clear()
+        for key, values in payload.get("relations", {}).items():
+            self.semantic_memory.relations[key] = [tuple(value) for value in values]
+        self.procedural_memory.skills = dict(payload.get("skills", {}))
+        self.procedural_memory.habits = dict(payload.get("habits", {}))
+        self.consolidator.consolidation_count = payload.get("consolidation_count", 0)
+        self.consolidator.dream_reports = list(payload.get("dream_reports", []))
+        return True
 
     def get_memory_summary(self) -> Dict[str, Any]:
         return {
