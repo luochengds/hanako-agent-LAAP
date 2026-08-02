@@ -109,6 +109,7 @@ import {
 } from "./session-prompt-snapshot.ts";
 import { buildTurnInputPresentationEvent } from "../lib/turn-input-presentation.ts";
 import { ensureSessionRefForPath } from "./session-manifest/ref.ts";
+import { beginLaapPsiTurn, finishLaapPsiTurn } from "./laap-psi-turn-gate.ts";
 
 const log = createModuleLogger("session");
 const SESSION_META_PAYLOAD_DIR = "session-meta-payloads";
@@ -2807,10 +2808,15 @@ export class SessionCoordinator {
     const promptOpts = buildPromptMediaOptions(opts);
     const nativeMediaTurn = engine?.beginCurrentTurnNativeMedia?.(sp, opts);
     if (sp && turnContext) this._setRuntimeValueForPath(this._turnContextBySession, sp, turnContext);
+    const psiTurn = await beginLaapPsiTurn(text);
     try {
       if (sp) this.preflightSessionInput(sp);
       await this._session.prompt(text, promptOpts);
     } finally {
+      const messages = this._session?.state?.messages || this._session?.messages || [];
+      const lastAssistant = [...messages].reverse().find((message: any) => message?.role === "assistant");
+      const psiResponse = lastAssistant ? collectAssistantTextFromMessage(lastAssistant) : "";
+      await finishLaapPsiTurn(psiTurn, psiResponse);
       if (sp && turnContext) this._deleteRuntimeValueForPath(this._turnContextBySession, sp);
       engine?.endCurrentTurnNativeMedia?.(nativeMediaTurn);
       pruneSessionInlineMediaHistory(this._session);
@@ -2910,6 +2916,7 @@ export class SessionCoordinator {
     const promptOpts = buildPromptMediaOptions(opts);
     const nativeMediaTurn = engine?.beginCurrentTurnNativeMedia?.(sessionPath, opts);
     if (turnContext) this._setRuntimeValueForPath(this._turnContextBySession, sessionPath, turnContext);
+    const psiTurn = await beginLaapPsiTurn(text);
     try {
       this.preflightSessionInput(sessionPath);
       if (typeof submitOptions?.afterCachePreflight === "function") {
@@ -2920,6 +2927,10 @@ export class SessionCoordinator {
       }
       await entry.session.prompt(text, promptOpts);
     } finally {
+      const messages = entry.session?.state?.messages || entry.session?.messages || [];
+      const lastAssistant = [...messages].reverse().find((message: any) => message?.role === "assistant");
+      const psiResponse = lastAssistant ? collectAssistantTextFromMessage(lastAssistant) : "";
+      await finishLaapPsiTurn(psiTurn, psiResponse);
       if (turnContext) this._deleteRuntimeValueForPath(this._turnContextBySession, sessionPath);
       engine?.endCurrentTurnNativeMedia?.(nativeMediaTurn);
       pruneSessionInlineMediaHistory(entry.session);
