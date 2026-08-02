@@ -291,6 +291,8 @@ Python 核心回归使用系统 Python 执行；项目 `.venv` 当前未安装 p
 
 ## PSI 输入/输出硬门控进度
 
+已记录并开始执行主体性边界原则：主体路径不可绕过 PSI，纯基础设施路径不伪装成主体行为。`RuntimePath` 已覆盖 input/decision/tool_action/memory_mutation/rsi_action/output/infrastructure，Agent 适配器已将工具行动纳入门控。
+
 已新增：
 
 ```text

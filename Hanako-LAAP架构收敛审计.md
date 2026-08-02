@@ -230,6 +230,8 @@ laap.agent_core.agent
 
 新增 `laap/runtime/psi_gateway.py`。canonical API/CLI Agent 的 `run()`、`chat()`、`chat_stream()` 现在经过强制 PSI before/after 边界；PSI 初始化或边界失败时不静默绕过。Codex/Lifelike 兼容分支也通过 `wrap_runtime_agent()` 接入同一边界。Hanako Desktop 的 `prompt()` / `promptSession()` 已增加 Sidecar PSI gate，使用 `LAAP_PSI_GATE_REQUIRED=1` 开启严格模式。当前默认使用仓库内 `LaapBridge`，若完整 `laap_brain` 不可用会使用其 fallback cognitive kernel。真实 Sidecar 联动探针已通过：`/before_turn` 和 `/after_turn` 均返回 HTTP 200，因此第一阶段硬门控链路可用；这仍不等同于完整 `laap.agi.PSIDriver` 六阶段接管。
 
+新增 `laap/runtime/subject_policy.py`，明确区分 PSI 必须覆盖的主体路径（输入、决定、工具行动、记忆变更、RSI、输出）与基础设施路径；适配器已将 `call_tool/execute_tool` 纳入 PSI 门控。
+
 真实 kernel Agent 适配探针已通过；新 Agent 的标识字段实际为 `_agent_id`，适配器已兼容该字段。启动时会记录可选 `model_tools` 未安装，但 kernel Agent 仍可创建并返回状态；这属于可选 Hermes 工具后端缺失，不是 runtime 入口阻断。
 
 真实 `run()` 探针发现并修复了一个实际接口问题：`Context.get_messages()` 返回 dict，而旧 Provider 要求消息对象提供 `to_dict()`。新增 `get_llm_messages()` 作为 typed provider view，并将 kernel Agent / conversation loop 的 Provider 调用切换到该视图；原 dict 兼容接口保持不变。

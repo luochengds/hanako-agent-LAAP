@@ -10,9 +10,11 @@ from .contracts import AgentLifecycle, AgentRuntime
 from .adapter import AgentLifecycleAdapter
 from .factory import create_runtime_agent, wrap_runtime_agent
 from .psi_gateway import PSITurnGateway, PSITurnReceipt
+from .subject_policy import RuntimePath, requires_psi
 
 __all__ = [
     "Agent", "AgentConfig", "AgentMode", "AgentState", "LAAPAgent",
     "AgentRuntime", "AgentLifecycle", "AgentLifecycleAdapter",
     "create_runtime_agent", "wrap_runtime_agent", "PSITurnGateway", "PSITurnReceipt",
+    "RuntimePath", "requires_psi",
 ]

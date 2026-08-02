@@ -51,19 +51,7 @@ class AgentLifecycleAdapter:
             return self.psi_gateway.invoke(task, lambda: self.backend.run(task))
         return self.backend.run(task)
 
-    def chat(self, message: str, *args: Any, **kwargs: Any) -> Any:
-        operation = lambda: self.backend.chat(message, *args, **kwargs)
-        if self.psi_gateway is not None:
-            return self.psi_gateway.invoke(message, operation)
-        return operation()
-
-    def chat_stream(self, message: str, *args: Any, **kwargs: Any) -> Any:
-        operation = lambda: self.backend.chat_stream(message, *args, **kwargs)
-        if self.psi_gateway is not None:
-            return self.psi_gateway.stream(message, operation)
-        return operation()
-
-    def chat(self, message: str, *args: Any, **kwargs: Any) -> Any:
+    def _call_chat_backend(self, message: str, *args: Any, **kwargs: Any) -> Any:
         """Call backends with their supported chat signature."""
         method = self.backend.chat
         signature = inspect.signature(method)
@@ -80,6 +68,30 @@ class AgentLifecycleAdapter:
             for p in parameters.values()
         )
         return method(message, *args[:max(0, positional_capacity - 1)], **kwargs)
+
+    def chat(self, message: str, *args: Any, **kwargs: Any) -> Any:
+        operation = lambda: self._call_chat_backend(message, *args, **kwargs)
+        if self.psi_gateway is not None:
+            return self.psi_gateway.invoke(message, operation)
+        return operation()
+
+    def chat_stream(self, message: str, *args: Any, **kwargs: Any) -> Any:
+        operation = lambda: self.backend.chat_stream(message, *args, **kwargs)
+        if self.psi_gateway is not None:
+            return self.psi_gateway.stream(message, operation)
+        return operation()
+
+    def execute_tool(self, name: str, **kwargs: Any) -> Any:
+        operation = lambda: self.backend.execute_tool(name, **kwargs)
+        if self.psi_gateway is not None:
+            return self.psi_gateway.invoke(f"tool:{name}", operation)
+        return operation()
+
+    def call_tool(self, name: str, **kwargs: Any) -> Any:
+        operation = lambda: self.backend.call_tool(name, **kwargs)
+        if self.psi_gateway is not None:
+            return self.psi_gateway.invoke(f"tool:{name}", operation)
+        return operation()
 
     def status(self) -> Dict[str, Any]:
         status_fn = getattr(self.backend, "status", None)
