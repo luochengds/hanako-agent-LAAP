@@ -307,7 +307,7 @@ chat_stream()
 
 已经经过 PSI before/after 边界，并生成内存中的 turn receipt；PSI 边界初始化失败时不会静默绕过。
 
-当前为第一阶段硬门控：默认调用 `LaapBridge`，完整 `laap_brain` 不存在时使用 fallback cognitive kernel。它还没有覆盖 Codex/Lifelike 兼容分支，也没有把 Hanako Desktop 全部聊天路径统一接入 `laap.agi.PSIDriver`。
+当前为第一阶段硬门控：默认调用 `LaapBridge`，完整 `laap_brain` 不存在时使用 fallback cognitive kernel；Codex/Lifelike 兼容分支也已通过 `wrap_runtime_agent()` 接入。Hanako Desktop 全部聊天路径尚未统一接入 `laap.agi.PSIDriver`。
 
 ## 上传状态
 

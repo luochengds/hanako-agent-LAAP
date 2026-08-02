@@ -18,7 +18,7 @@ import argparse, sys, os, json, logging, subprocess, time
 from typing import Any, Dict, List, Optional
 
 from laap import __version__
-from laap.runtime import AgentConfig, AgentLifecycleAdapter, create_runtime_agent
+from laap.runtime import AgentConfig, AgentLifecycleAdapter, create_runtime_agent, wrap_runtime_agent
 from laap.runtime.legacy import LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
 from laap.llm.factory import LLMFactory
 from laap.cli.repl import LAAP_REPL
@@ -185,11 +185,15 @@ def create_agent(args) -> AgentLifecycleAdapter:
     if args.type == "codex":
         config = CodexConfig(name=args.name or "Codex", workspace_dir=args.workspace or os.getcwd(),
                              verbose=True, rsi_enabled=not args.no_rsi)
-        return CodexAgent(config=config, llm_factory=factory, show_banner=show_banner)
+        return wrap_runtime_agent(CodexAgent(
+            config=config, llm_factory=factory, show_banner=show_banner,
+        ))
     elif args.type in ("lifelike", "psi"):
         config = LifelikeConfig(name=args.name or "Ao", verbose=True,
                                 rsi_enabled=not args.no_rsi, rsi_interval=args.rsi_interval or 20)
-        agent = LifelikeAgent(config=config, llm_factory=factory, show_banner=show_banner)
+        agent = wrap_runtime_agent(LifelikeAgent(
+            config=config, llm_factory=factory, show_banner=show_banner,
+        ))
         if args.task and hasattr(agent, 'awareness') and agent.awareness:
             agent.awareness.set_task(args.task)
         return agent

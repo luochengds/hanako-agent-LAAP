@@ -9,6 +9,11 @@ from .agent import Agent, AgentConfig
 from .psi_gateway import PSITurnGateway
 
 
+def wrap_runtime_agent(backend: Any) -> AgentLifecycleAdapter:
+    """Put an existing Agent implementation behind the mandatory PSI gate."""
+    return AgentLifecycleAdapter(backend, psi_gateway=PSITurnGateway.default())
+
+
 def create_runtime_agent(
     config: Optional[AgentConfig] = None,
     *,
@@ -25,7 +30,7 @@ def create_runtime_agent(
     if llm_factory is not None:
         backend_kwargs["llm_factory"] = llm_factory
     backend = Agent(config=config, mode="agi", **backend_kwargs)
-    return AgentLifecycleAdapter(backend, psi_gateway=PSITurnGateway.default())
+    return wrap_runtime_agent(backend)
 
 
-__all__ = ["create_runtime_agent"]
+__all__ = ["create_runtime_agent", "wrap_runtime_agent"]

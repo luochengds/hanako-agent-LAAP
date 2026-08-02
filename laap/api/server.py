@@ -158,14 +158,14 @@ else:
 
     @app.post("/agents/create")
     async def create_agent(req: CreateAgentRequest) -> Dict[str, Any]:
-        from laap.runtime import AgentConfig, create_runtime_agent
+        from laap.runtime import AgentConfig, create_runtime_agent, wrap_runtime_agent
         from laap.runtime.legacy import LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
         if req.type == "codex":
             config = CodexConfig(name=req.name, workspace_dir=req.workspace)
-            agent = CodexAgent(config=config, llm_factory=factory)
+            agent = wrap_runtime_agent(CodexAgent(config=config, llm_factory=factory))
         elif req.type == "lifelike":
             config = LifelikeConfig(name=req.name, rsi_enabled=req.rsi_enabled)
-            agent = LifelikeAgent(config=config, llm_factory=factory)
+            agent = wrap_runtime_agent(LifelikeAgent(config=config, llm_factory=factory))
         else:
             config = AgentConfig(name=req.name)
             agent = create_runtime_agent(config=config, llm_factory=factory)
@@ -278,8 +278,9 @@ else:
         agent = agents.get(agent_id)
         if not agent: raise HTTPException(404, "Agent not found")
         from laap.runtime.legacy import LifelikeAgent
-        if isinstance(agent, LifelikeAgent):
-            return agent.step(req.observation, req.task_success)
+        backend = getattr(agent, "backend", agent)
+        if isinstance(backend, LifelikeAgent):
+            return backend.step(req.observation, req.task_success)
         return {"error": "LifelikeAgent required for step"}
 
     @app.post("/agents/{agent_id}/rsi")
