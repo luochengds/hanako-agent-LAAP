@@ -198,6 +198,18 @@ corrupt_state_does_not_raise：True
 
 结论：重复写入当前是明确的 append 语义，而不是自动去重；损坏的主状态文件会返回加载失败，但不会向调用方抛出异常。后续需要决定是否增加记忆内容去重策略，以及是否提供更明确的 degraded recovery 状态。
 
+## 第八轮结果：部分状态文件缺失
+
+删除单个 sidecar 后，当前 `AGIAgent.load()` 仍返回 `True`：
+
+```text
+缺失 world_model.json：load=True，世界模型回到初始化状态
+缺失 unified_memory.json：load=True，episodic memory 回到 0
+缺失 cognitive_bus_state.json：load=True，bus cycles 回到 0
+```
+
+这说明主状态文件与 sidecar 的恢复目前是“尽力加载”语义，但没有向调用方暴露降级信息。下一步应增加结构化 `load_status`，明确报告每个 sidecar 的 loaded/missing/corrupt 状态，而不是简单依赖布尔值。
+
 ## 当前判断
 
 从本轮指标看：

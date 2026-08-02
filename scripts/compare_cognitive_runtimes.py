@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import tempfile
 import time
 from pathlib import Path
@@ -197,11 +198,29 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
     (corrupt_dir / "agi_state.json").write_text("{not valid json", encoding="utf-8")
     corrupt_agent = EdgeAgent(name="corrupt-probe", state_dir=str(corrupt_dir))
     corrupt_load_result = bool(corrupt_agent.load())
+
+    partial_results = {}
+    complete_state = edge_root / "complete"
+    complete_agent = EdgeAgent(name="partial-probe", state_dir=str(complete_state))
+    complete_agent.unified_memory.encode_experience("partial recovery marker")
+    complete_agent.save()
+    for missing_name in ("world_model.json", "unified_memory.json", "cognitive_bus/cognitive_bus_state.json"):
+        case_dir = edge_root / ("missing_" + missing_name.replace("/", "_"))
+        shutil.copytree(complete_state, case_dir, dirs_exist_ok=True)
+        (case_dir / missing_name).unlink(missing_ok=True)
+        loaded_agent = EdgeAgent(name="partial-probe", state_dir=str(case_dir))
+        partial_results[missing_name] = {
+            "load_result": bool(loaded_agent.load()),
+            "memory_count": loaded_agent.get_state().get("unified_memory", {}).get("episodic_memory_count"),
+            "bus_cycles": loaded_agent.get_state().get("cognitive_bus", {}).get("cycles"),
+            "world_entities": len(loaded_agent.world.entities),
+        }
     agi_result["persistence_edge_cases"] = {
         "duplicate_memory_count_after_reload": duplicate_count,
         "duplicate_write_is_append_semantics": duplicate_count == 2,
         "corrupt_main_state_load_result": corrupt_load_result,
         "corrupt_state_does_not_raise": True,
+        "partial_file_results": partial_results,
     }
     bridge_result["persistence"] = {"supported": False}
     return {
