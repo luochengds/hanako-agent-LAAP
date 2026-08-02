@@ -512,6 +512,7 @@ export interface BrowserViewerOpenTarget {
 export interface PlatformApi {
   getServerPort(): Promise<string>;
   getServerToken(): Promise<string>;
+  getSidecarAgentsOnline?(): Promise<{ agents?: Array<{ public_key: string; [key: string]: unknown }> }>;
   runEditCommand?(command: 'cut' | 'copy' | 'paste' | 'selectAll'): Promise<boolean>;
   openSettings(tab?: string): void;
   openBrowserViewer(target?: string | BrowserViewerOpenTarget): void;

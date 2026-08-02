@@ -102,9 +102,10 @@ function App() {
   useEffect(() => {
     if (!(laaperChatOpen || trioChatOpen || charterGuardianOpen) || selfPublicKey) return;
     let cancelled = false;
-    fetch('http://127.0.0.1:11521/agents/online')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+    const agentsRequest = window.hana?.getSidecarAgentsOnline
+      ? window.hana.getSidecarAgentsOnline()
+      : fetch('http://127.0.0.1:11521/agents/online').then((r) => (r.ok ? r.json() : null));
+    agentsRequest.then((data) => {
         if (cancelled || !data?.agents) return;
         const self = data.agents.find(
           (a: { name?: string; public_key?: string }) =>

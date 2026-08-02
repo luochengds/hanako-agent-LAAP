@@ -5037,6 +5037,19 @@ wrapIpcHandler("get-update-digest-history", () => loadUpdateDigestHistory());
 // ── IPC ──
 wrapIpcHandler("get-server-port", () => serverPort);
 wrapIpcHandler("get-server-token", () => serverToken);
+wrapIpcHandler("get-sidecar-agents-online", async () => {
+  const tokenPath = process.env.ARIS_SIDECAR_TOKEN_PATH
+    || path.join(process.cwd(), "aris-bridge", "aris-engine", "state", "aris-sidecar.token");
+  const token = process.env.ARIS_SIDECAR_TOKEN?.trim()
+    || (fs.existsSync(tokenPath) ? fs.readFileSync(tokenPath, "utf8").trim() : "");
+  if (!token) throw new Error("Sidecar token unavailable");
+  const response = await fetch("http://127.0.0.1:11521/agents/online", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await response.text();
+  if (!response.ok) throw new Error(`Sidecar agents request failed (${response.status})`);
+  return JSON.parse(body);
+});
 wrapIpcHandler("run-edit-command", (event, command) => {
   const allowed = new Set(["cut", "copy", "paste", "selectAll"]);
   if (!allowed.has(command)) {

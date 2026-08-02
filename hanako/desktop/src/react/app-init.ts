@@ -310,9 +310,10 @@ export async function initApp(): Promise<void> {
   // identity_registry.json 不存在 → 自动触发诞生仪式
   // spec SubTask 2.8: 最小化检查，不阻塞主流程，失败静默
   try {
-    const sidecarResp = await fetch('http://127.0.0.1:11521/agents/online');
-    if (sidecarResp.ok) {
-      const sidecarData = (await sidecarResp.json()) as { agents?: Array<{ public_key: string }> };
+    const sidecarData: { agents?: Array<{ public_key: string }> } | null = window.hana?.getSidecarAgentsOnline
+      ? await window.hana.getSidecarAgentsOnline()
+      : await fetch('http://127.0.0.1:11521/agents/online').then((response) => response.ok ? response.json() : null);
+    if (sidecarData) {
       // 仅当返回空列表时触发（Aris stub 在注册表为空时由 sidecar 兜底返回，
       // 故若 sidecar 返回 Aris stub 也说明注册表为空 → 触发诞生仪式）
       const hasRealLaaper = (sidecarData.agents ?? []).some(

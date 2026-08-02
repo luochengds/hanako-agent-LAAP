@@ -126,9 +126,14 @@ export function BubbleField({
     let cancelled = false;
     const poll = async () => {
       try {
-        const resp = await fetch(endpoint);
-        if (!resp.ok) return;
-        const data = (await resp.json()) as { agents?: AgentOnline[] };
+        const hana = (window as unknown as { hana?: { getSidecarAgentsOnline?: () => Promise<{ agents?: AgentOnline[] }> } }).hana;
+        const data = (endpoint === "http://127.0.0.1:11521/agents/online" && hana?.getSidecarAgentsOnline)
+          ? await hana.getSidecarAgentsOnline()
+          : await fetch(endpoint).then(async (resp) => {
+              if (!resp.ok) return null;
+              return await resp.json();
+            });
+        if (!data) return;
         if (!cancelled && data.agents) {
           syncAgents(data.agents);
         }
