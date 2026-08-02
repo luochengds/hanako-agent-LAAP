@@ -309,7 +309,7 @@ chat_stream()
 
 已经经过 PSI before/after 边界，并生成内存中的 turn receipt；PSI 边界初始化失败时不会静默绕过。
 
-当前为第一阶段硬门控：默认调用 `LaapBridge`，完整 `laap_brain` 不存在时使用 fallback cognitive kernel；Codex/Lifelike 兼容分支也已通过 `wrap_runtime_agent()` 接入。Hanako Desktop 的 `prompt()` / `promptSession()` 已增加 Sidecar gate，设置 `LAAP_PSI_GATE_REQUIRED=1` 后进入严格模式。真实 Sidecar 联动探针已通过：`/before_turn`、`/after_turn` 均返回 HTTP 200。`CognitiveRuntime` 统一事务接口已建立，尚未把 `AGIAgent` 或完整 `laap.agi.PSIDriver` 切换为唯一实现。
+当前为第一阶段硬门控：默认调用 `LaapBridge`，完整 `laap_brain` 不存在时使用 fallback cognitive kernel；Codex/Lifelike 兼容分支也已通过 `wrap_runtime_agent()` 接入。Hanako Desktop 的 `prompt()` / `promptSession()` 已增加 Sidecar gate，设置 `LAAP_PSI_GATE_REQUIRED=1` 后进入严格模式。真实 Sidecar 联动探针已通过：`/before_turn`、`/after_turn` 均返回 HTTP 200。`CognitiveRuntime` 统一事务接口已建立；设置 `LAAP_COGNITIVE_RUNTIME=agi` 可切换到已验证的 `AGIAgent.process_interaction` 认知管线，默认仍未切换，完整 `laap.agi.PSIDriver` 尚未成为唯一实现。
 
 ## PSI 绕过例外
 

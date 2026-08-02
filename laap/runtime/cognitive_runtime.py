@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, Protocol, runtime_checkable
+import os
+from pathlib import Path
 
 
 @dataclass
@@ -48,4 +50,56 @@ class BridgeCognitiveRuntime:
         self.bridge.after_turn(response)
 
 
-__all__ = ["CognitiveTurn", "CognitiveRuntime", "BridgeCognitiveRuntime"]
+class AGIAgentCognitiveRuntime:
+    """Adapt the integrated AGIAgent cognitive pipeline.
+
+    This adapter is opt-in while the existing Bridge remains the default. The
+    AGIAgent pipeline performs the full cognitive assessment before language
+    I/O; the response is recorded for the next learning/state persistence step
+    without running a second PSI cycle for the same user turn.
+    """
+
+    def __init__(self, agent: Any):
+        self.agent = agent
+        self._turn_count = 0
+
+    @classmethod
+    def create(cls, *, name: str = "LAAP-Agent") -> "AGIAgentCognitiveRuntime":
+        from laap.agi.core import AGIAgent
+
+        state_dir = os.environ.get("LAAP_AGI_STATE_DIR")
+        if state_dir is None:
+            try:
+                from laap.config.paths import get_state_dir
+                state_dir = str(Path(get_state_dir()) / "agi")
+            except Exception:
+                state_dir = None
+        return cls(AGIAgent(name=name, state_dir=state_dir))
+
+    def begin_turn(self, user_input: str) -> CognitiveTurn:
+        self._turn_count += 1
+        report = self.agent.process_interaction(user_input, use_psi=True)
+        if not isinstance(report, dict):
+            report = {"result": report}
+        return CognitiveTurn(
+            turn_id=self._turn_count,
+            user_input=user_input,
+            context=report,
+        )
+
+    def complete_turn(self, turn: CognitiveTurn, response: str) -> None:
+        # The AGIAgent cycle already performs perception/learning for this
+        # input. Persist the resulting cognitive state without a duplicate
+        # second cycle for the generated response.
+        self.agent.last_response = response
+        save = getattr(self.agent, "save", None)
+        if callable(save):
+            save()
+
+
+__all__ = [
+    "CognitiveTurn",
+    "CognitiveRuntime",
+    "BridgeCognitiveRuntime",
+    "AGIAgentCognitiveRuntime",
+]
