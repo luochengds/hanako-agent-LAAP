@@ -254,7 +254,7 @@ Hanako 核心：76 passed
 
 ## 统一认知 Runtime 第一阶段
 
-新增 `laap/runtime/cognitive_runtime.py`，定义统一的 `CognitiveRuntime`、`CognitiveTurn`、当前 `LaapBridge` 的 `BridgeCognitiveRuntime` 适配器，以及可选的 `AGIAgentCognitiveRuntime`。设置 `LAAP_COGNITIVE_RUNTIME=agi` 后，PSI Gateway 会使用 `AGIAgent.process_interaction(use_psi=True)`；真实探针已通过并返回完整认知报告。默认仍使用 Bridge，避免一次性改变生产后端。
+新增 `laap/runtime/cognitive_runtime.py`，定义统一的 `CognitiveRuntime`、`CognitiveTurn`、当前 `LaapBridge` 的 `BridgeCognitiveRuntime` 适配器，以及可选的 `AGIAgentCognitiveRuntime`。设置 `LAAP_COGNITIVE_RUNTIME=agi` 后，PSI Gateway 会使用 `AGIAgent.process_interaction(use_psi=True)`；真实探针已通过并返回完整认知报告。新增 `scripts/compare_cognitive_runtimes.py`，可在隔离状态目录中对同一批 fixture 做 Bridge/AGIAgent 离线 A/B 比较。默认仍使用 Bridge，避免一次性改变生产后端。
 
 ## 当前结论
 
