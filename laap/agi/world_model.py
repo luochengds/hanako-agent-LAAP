@@ -1452,6 +1452,14 @@ class AbstractWorldModel(ABC):
         self._sandbox_id: Optional[str] = None
         self._project_snapshot: Optional[Any] = None
 
+    def save(self, path: str | None = None):
+        """Persist the unified world model through the compatibility façade."""
+        return self.unified.save(path)
+
+    def load(self, path: str | None = None):
+        """Restore the unified world model through the compatibility façade."""
+        return self.unified.load(path)
+
     @abstractmethod
     def add_entity(self, name: str, entity_type: EntityType = EntityType.UNKNOWN,
                    properties: Dict = None) -> Entity:

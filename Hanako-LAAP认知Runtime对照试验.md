@@ -106,12 +106,24 @@ growth：+0.007
 
 ## 第三轮结果：状态恢复
 
-AGIAgent 在隔离目录中运行 6 次 interaction 后：
+初次对照发现：AGIAgent 能恢复 `total_interactions`，但世界模型和 CognitiveBus 的稳定摘要未完全一致。
+
+已修复：
+
+- `AGIAgent.save()` 持久化 CognitiveBus；
+- `AGIAgent` 启动时恢复 CognitiveBus；
+- `AbstractWorldModel` 增加统一 `save/load` façade；
+- LocalWorldModel 的世界实体通过 UnifiedWorldModel 持久化。
+
+修复后结果：
 
 ```text
 保存状态：成功
 新实例加载：成功
 total_interactions：6
+stable_summary_matches：True
+world_entities：12 → 12
+cognitive_bus_cycles：12 → 12
 ```
 
 Bridge：
@@ -120,7 +132,7 @@ Bridge：
 无独立 AGIAgent 状态恢复能力
 ```
 
-结论：AGIAgent 已具备可验证的状态持久化和重载能力。
+结论：AGIAgent 已具备可验证的认知状态、世界模型和 CognitiveBus 重载能力。
 
 ## 当前判断
 

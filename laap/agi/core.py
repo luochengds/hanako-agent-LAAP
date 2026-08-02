@@ -149,6 +149,13 @@ class AGIAgent:
         if enable_all:
             self._init_all_modules()
 
+        # Enable persistence for cognitive state before restoring the agent.
+        if self.state_dir and self.cognitive_bus:
+            self.cognitive_bus.enable_persistence(
+                str(self.state_dir / "cognitive_bus"),
+                auto_save_interval=0,
+            )
+
         # Try to load previous state
         self._load_if_exists()
 
@@ -748,6 +755,11 @@ class AGIAgent:
         state = self.get_state()
         state["saved_at"] = time.time()
 
+        if self.world is not None and callable(getattr(self.world, "save", None)):
+            self.world.save(str(save_path.parent / "world_model.json"))
+        if self.cognitive_bus is not None:
+            self.cognitive_bus.save_state()
+
         with open(save_path, 'w', encoding='utf-8') as f:
             json.dump(state, f, indent=2, default=str, ensure_ascii=False)
 
@@ -769,6 +781,8 @@ class AGIAgent:
                 state = json.load(f)
 
             self.total_interactions = state.get("total_interactions", 0)
+            if self.world is not None and callable(getattr(self.world, "load", None)):
+                self.world.load(str(load_path.parent / "world_model.json"))
 
             # Restore self-knowledge to self-model
             if self.self_model and "self_knowledge" in state:

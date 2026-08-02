@@ -50,6 +50,27 @@ def _numeric_delta(first: Any, last: Any) -> Dict[str, float]:
     return delta
 
 
+def _stable_state_summary(state: Dict[str, Any]) -> Dict[str, Any]:
+    world = state.get("world_model", {}) or {}
+    self_model = state.get("self_model", {}) or {}
+    causal = state.get("causal", {}) or {}
+    conscious = state.get("conscious", {}) or {}
+    memory = state.get("unified_memory", {}) or {}
+    bus = state.get("cognitive_bus", {}) or {}
+    entities = world.get("entities", {}) or {}
+    frames = conscious.get("frames", []) or []
+    return {
+        "total_interactions": state.get("total_interactions"),
+        "world_entities": len(entities) if hasattr(entities, "__len__") else entities,
+        "self_total_actions": self_model.get("total_actions"),
+        "causal_total_learns": causal.get("total_learns"),
+        "conscious_frames": len(frames) if hasattr(frames, "__len__") else frames,
+        "episodic_memory_count": memory.get("episodic_memory_count"),
+        "semantic_memory_count": memory.get("semantic_memory_count"),
+        "cognitive_bus_cycles": bus.get("cycles"),
+    }
+
+
 def _run_runtime(name: str, runtime: Any, fixtures: Iterable[str]) -> Dict[str, Any]:
     turns = []
     for index, text in enumerate(fixtures, start=1):
@@ -104,14 +125,26 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
     agi = AGIAgentCognitiveRuntime(AGIAgent(name="comparison-agi", state_dir=str(agi_state)))
     agi_result = _run_runtime("agi", agi, fixtures)
 
+    final_state = agi.agent.get_state()
     reloaded = AGIAgent(name="comparison-agi", state_dir=str(agi_state))
     loaded = bool(reloaded.load())
     restored_state = reloaded.get_state() if loaded else {}
+    compare_keys = ("total_interactions", "world_model", "self_model", "causal", "conscious", "unified_memory", "cognitive_bus")
+    state_matches = {
+        key: final_state.get(key) == restored_state.get(key)
+        for key in compare_keys
+        if key in final_state and key in restored_state
+    }
+    final_summary = _stable_state_summary(final_state)
+    restored_summary = _stable_state_summary(restored_state)
     agi_result["persistence"] = {
         "supported": True,
         "loaded": loaded,
         "total_interactions": restored_state.get("total_interactions"),
-        "module_count": restored_state.get("module_count"),
+        "state_matches": state_matches,
+        "final_summary": final_summary,
+        "restored_summary": restored_summary,
+        "stable_summary_matches": final_summary == restored_summary,
     }
     bridge_result["persistence"] = {"supported": False}
     return {
