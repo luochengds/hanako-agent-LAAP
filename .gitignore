@@ -66,6 +66,7 @@ __pycache__/
 .Python
 *.manifest
 *.spec
+*.obj
 
 # Virtual environments
 .venv/
