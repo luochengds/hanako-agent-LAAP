@@ -282,18 +282,22 @@ function FolderPicker({
 
   const handleBrowse = useCallback(async () => {
     setShowHistory(false);
-    const folder = await window.platform?.selectFolder?.();
-    if (!folder) return;
-    const workspace = await createLocalStudioWorkspaceFromFolder(folder);
+    // Desktop uses the native picker; Web has no native folder dialog, so allow
+    // an explicit local path. The server still validates/authorizes the path.
+    const folder = await window.platform?.selectFolder?.()
+      ?? window.prompt('输入工作台文件夹路径', 'E:\\worke\\hanako-agent-LAAP\\work');
+    if (!folder?.trim()) return;
+    const workspace = await createLocalStudioWorkspaceFromFolder(folder.trim());
     if (workspace) {
       await applyStudioWorkspace(workspace);
     }
   }, []);
 
   const handleAddWorkspaceFolder = useCallback(async () => {
-    const folder = await window.platform?.selectFolder?.();
-    if (!folder) return;
-    addWorkspaceFolder(folder);
+    const folder = await window.platform?.selectFolder?.()
+      ?? window.prompt('输入额外文件夹路径');
+    if (!folder?.trim()) return;
+    addWorkspaceFolder(folder.trim());
   }, []);
 
   const handleButtonClick = useCallback(() => {
