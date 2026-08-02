@@ -291,7 +291,7 @@ Python 核心回归使用系统 Python 执行；项目 `.venv` 当前未安装 p
 
 ## PSI 输入/输出硬门控进度
 
-已记录并开始执行主体性边界原则：主体路径不可绕过 PSI，纯基础设施路径不伪装成主体行为。`RuntimePath` 已覆盖 input/decision/tool_action/memory_mutation/rsi_action/output/infrastructure，Agent 适配器已将工具行动纳入门控，API 的 RSI 触发/采纳和 Triphase memory store 也已接入 PSI gateway。
+已记录并开始执行主体性边界原则：主体路径不可绕过 PSI，纯基础设施路径不伪装成主体行为。`RuntimePath` 已覆盖 input/decision/tool_action/memory_mutation/rsi_action/output/infrastructure，Agent 适配器已将工具行动纳入门控，API 的 RSI 触发/采纳和 Triphase memory store 也已接入 PSI gateway。turn receipt 现在按哈希和状态持久化；`LAAP_PSI_RECEIPT_REQUIRED=1` 可将持久化失败设为阻断条件。
 
 已新增：
 

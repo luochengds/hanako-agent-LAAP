@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterator, Optional
+import hashlib
+import json
+import os
+from pathlib import Path
 import time
 
 
@@ -17,6 +21,7 @@ class PSITurnReceipt:
     output_seen: bool = False
     started_at: float = field(default_factory=time.time)
     finished_at: Optional[float] = None
+    status: str = "started"
 
 
 class PSITurnGateway:
@@ -27,10 +32,46 @@ class PSITurnGateway:
     call.  A failed boundary raises instead of silently bypassing PSI.
     """
 
-    def __init__(self, driver: Any):
+    def __init__(self, driver: Any, *, receipt_path: Optional[Path] = None):
         self.driver = driver
         self._turn_count = 0
         self.last_receipt: Optional[PSITurnReceipt] = None
+        self.receipt_path = receipt_path or self._default_receipt_path()
+
+    @staticmethod
+    def _default_receipt_path() -> Path:
+        configured = os.environ.get("LAAP_PSI_RECEIPT_PATH")
+        if configured:
+            return Path(configured).expanduser()
+        try:
+            from laap.config.paths import get_state_dir
+            return get_state_dir() / "psi-turn-receipts.jsonl"
+        except Exception:
+            return Path.cwd() / ".laap" / "state" / "psi-turn-receipts.jsonl"
+
+    @staticmethod
+    def _digest(value: Any) -> str:
+        return hashlib.sha256(str(value).encode("utf-8", errors="replace")).hexdigest()
+
+    def _persist_receipt(self, receipt: PSITurnReceipt, output: Any = "") -> None:
+        record = {
+            "turn_id": receipt.turn_id,
+            "input_sha256": self._digest(receipt.user_input),
+            "output_sha256": self._digest(output) if receipt.output_seen else None,
+            "context_keys": sorted(receipt.context.keys()),
+            "output_seen": receipt.output_seen,
+            "status": receipt.status,
+            "started_at": receipt.started_at,
+            "finished_at": receipt.finished_at,
+        }
+        try:
+            receipt_path = Path(self.receipt_path)
+            receipt_path.parent.mkdir(parents=True, exist_ok=True)
+            with receipt_path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        except Exception:
+            if os.environ.get("LAAP_PSI_RECEIPT_REQUIRED") == "1":
+                raise
 
     @classmethod
     def default(cls) -> "PSITurnGateway":
@@ -57,7 +98,9 @@ class PSITurnGateway:
     def _after(self, receipt: PSITurnReceipt, output: Any) -> Any:
         receipt.output_seen = True
         receipt.finished_at = time.time()
+        receipt.status = "completed"
         self.driver.after_turn(str(output))
+        self._persist_receipt(receipt, output)
         return output
 
     def invoke(self, user_input: str, operation: Callable[[], Any]) -> Any:
@@ -68,6 +111,8 @@ class PSITurnGateway:
             # The input crossed PSI, but no output was produced. Preserve the
             # receipt and re-raise the original backend error.
             receipt.finished_at = time.time()
+            receipt.status = "backend_error"
+            self._persist_receipt(receipt)
             raise
         return self._after(receipt, output)
 
@@ -80,11 +125,16 @@ class PSITurnGateway:
                 yield item
         except Exception:
             receipt.finished_at = time.time()
+            receipt.status = "backend_error"
+            self._persist_receipt(receipt)
             raise
         else:
+            output = "".join(str(item) for item in chunks)
             receipt.output_seen = True
             receipt.finished_at = time.time()
-            self.driver.after_turn("".join(str(item) for item in chunks))
+            receipt.status = "completed"
+            self.driver.after_turn(output)
+            self._persist_receipt(receipt, output)
 
 
 __all__ = ["PSITurnGateway", "PSITurnReceipt"]
