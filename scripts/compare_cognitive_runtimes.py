@@ -57,6 +57,8 @@ def _stable_state_summary(state: Dict[str, Any]) -> Dict[str, Any]:
     conscious = state.get("conscious", {}) or {}
     memory = state.get("unified_memory", {}) or {}
     bus = state.get("cognitive_bus", {}) or {}
+    cognitive_state = dict(bus.get("state", {}) or {})
+    cognitive_state.pop("timestamp", None)
     entities = world.get("entities", {}) or {}
     frames = conscious.get("frames", []) or []
     return {
@@ -68,6 +70,7 @@ def _stable_state_summary(state: Dict[str, Any]) -> Dict[str, Any]:
         "episodic_memory_count": memory.get("episodic_memory_count"),
         "semantic_memory_count": memory.get("semantic_memory_count"),
         "cognitive_bus_cycles": bus.get("cycles"),
+        "cognitive_state": cognitive_state,
     }
 
 

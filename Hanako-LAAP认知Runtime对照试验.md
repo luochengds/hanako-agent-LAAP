@@ -134,6 +134,30 @@ Bridge：
 
 结论：AGIAgent 已具备可验证的认知状态、世界模型和 CognitiveBus 重载能力。
 
+## 第四轮结果：需求、情绪、注意力恢复
+
+继续比较重载前后的 CognitiveBus 状态，忽略运行时间戳后，比较：
+
+```text
+needs：一致
+emotion：一致
+attention.focus：一致
+attention.intensity：一致
+attention.top_salient：一致
+self_presence：一致
+curiosity：一致
+narrative：一致
+```
+
+结果：
+
+```text
+cognitive_state equality：True
+stable_summary_matches：True
+```
+
+本轮发现并修复一个细节：注意力的 `top_salient` 在保存后被写出，但加载时没有恢复到 `salience_map`。修复后注意力状态实现完整恢复。
+
 ## 当前判断
 
 从本轮指标看：

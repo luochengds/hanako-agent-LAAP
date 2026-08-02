@@ -534,6 +534,12 @@ class CognitiveBus:
             except ValueError as e:
                 logger.debug(f"操作失败: {e}")
             self.attention.intensity = attn.get("intensity", self.attention.intensity)
+            self.attention.salience_map = {
+                str(item[0]): float(item[1])
+                for item in attn.get("top_salient", [])
+                if isinstance(item, (list, tuple)) and len(item) == 2
+                and isinstance(item[1], (int, float))
+            }
             self.self_presence = data.get("self_presence", self.self_presence)
             self.curiosity = data.get("curiosity", self.curiosity)
             self.last_frame_narrative = data.get("narrative", "")
