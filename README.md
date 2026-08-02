@@ -2,9 +2,9 @@
 
 > 把 LAAP 数字生命体架构与 Hanako 桌面端融为一体的开源发行版。
 
-[![Build macOS DMG](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-macos.yml)
-[![Build Windows Installer](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-windows.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-windows.yml)
-[![Build Linux Packages](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-linux.yml/badge.svg)](https://github.com/lorryjovens-hub/hanako-agent-LAAP/actions/workflows/build-linux.yml)
+[![Build macOS DMG](https://github.com/luochengds/hanako-agent-LAAP/actions/workflows/build-macos.yml/badge.svg)](https://github.com/luochengds/hanako-agent-LAAP/actions/workflows/build-macos.yml)
+[![Build Windows Installer](https://github.com/luochengds/hanako-agent-LAAP/actions/workflows/build-windows.yml/badge.svg)](https://github.com/luochengds/hanako-agent-LAAP/actions/workflows/build-windows.yml)
+[![Build Linux Packages](https://github.com/luochengds/hanako-agent-LAAP/actions/workflows/build-linux.yml/badge.svg)](https://github.com/luochengds/hanako-agent-LAAP/actions/workflows/build-linux.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](hanako/LICENSE)
 
@@ -54,8 +54,14 @@
 
 #### Windows
 
-```powershell
-installer\setup_aris_hanako.cmd
+```bat
+自动安装依赖.bat
+```
+
+只检测环境：
+
+```bat
+自动安装依赖.bat --dry-run
 ```
 
 #### Linux / macOS
@@ -65,7 +71,7 @@ chmod +x installer/setup_aris_hanako.sh
 ./installer/setup_aris_hanako.sh
 ```
 
-一键脚本会自动完成：环境检测 → 创建 `.venv` → 安装 Python 依赖 → 安装 Hanako npm 依赖 → 构建桌面端 → 初始化记忆库。
+依赖脚本会自动完成：环境检测 → 创建 `.venv` → 安装 Python 依赖 → 安装 Hanako npm 依赖。它不会写入 API Key，也不会删除源码或运行配置。完整说明见 [`BOOTSTRAP.md`](BOOTSTRAP.md)。
 
 ### 手动安装
 
@@ -80,7 +86,7 @@ pip install -r requirements.txt
 
 # 3. 安装 Hanako 依赖
 cd hanako
-npm install
+npm ci
 
 # 4. 构建桌面端（开发预览）
 npm run build:client
