@@ -292,6 +292,11 @@ class AGIAgent:
         Returns:
             Comprehensive interaction report with full cognitive state
         """
+        if not use_psi and os.environ.get("LAAP_ALLOW_PSI_BYPASS") != "1":
+            raise RuntimeError(
+                "PSI bypass is disabled for subject interactions; "
+                "set LAAP_ALLOW_PSI_BYPASS=1 only for explicitly classified infrastructure work."
+            )
         ctx = context or {}
         start_time = time.time()
 
