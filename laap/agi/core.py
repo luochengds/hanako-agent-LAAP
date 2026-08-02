@@ -653,6 +653,7 @@ class AGIAgent:
             # Phase 7.5: ACT — LLM is an expression channel only
             # ════════════════════════════════════════════════════
             response_text = ""
+            act_error = None
             driver_llm = getattr(self.psi_driver, "llm", None)
             if driver_llm is not None:
                 try:
@@ -663,6 +664,7 @@ class AGIAgent:
                     raw_response = driver_llm(prompt)
                     response_text = raw_response.get("text", "") if isinstance(raw_response, dict) else str(raw_response)
                 except Exception as exc:
+                    act_error = f"{type(exc).__name__}: {exc}"
                     logger.warning(f"PSI expression channel failed: {exc}")
             if not response_text and self.hermes and getattr(self.hermes, "hermes_available", False):
                 try:
@@ -672,10 +674,17 @@ class AGIAgent:
                     )
                     response_text = raw_response.get("text", "") if isinstance(raw_response, dict) else str(raw_response)
                 except Exception as exc:
+                    act_error = f"{type(exc).__name__}: {exc}"
                     logger.warning(f"Hermes expression channel failed: {exc}")
-            if not response_text:
+            used_fallback = not bool(response_text)
+            if used_fallback:
                 response_text = f"[PSI Driver - {domain}] Processed cycle {self.total_interactions}. No LLM channel available."
             result["response"] = response_text
+            result["act"] = {
+                "channel_configured": driver_llm is not None,
+                "used_fallback": used_fallback,
+                "error": act_error,
+            }
 
             # ─── Final bus tick ───
             if self.cognitive_bus:
