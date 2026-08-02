@@ -33,6 +33,41 @@ git revert d78d0ef
 
 请优先使用 `git revert`，不要改写共享历史。
 
+## 配置真实 LLM Provider
+
+仅在当前 PowerShell 会话设置，不要把 API Key 写进 Git：
+
+```powershell
+$env:LAAP_PROVIDER="deepseek"
+$env:LAAP_API_KEY="<你的 API Key>"
+$env:LAAP_BASE_URL="https://api.deepseek.com/v1"
+$env:LAAP_MODEL="deepseek-chat"
+```
+
+也可使用 OpenAI：
+
+```powershell
+$env:LAAP_PROVIDER="openai"
+$env:LAAP_API_KEY="<你的 API Key>"
+$env:LAAP_MODEL="gpt-4o-mini"
+Remove-Item Env:LAAP_BASE_URL -ErrorAction SilentlyContinue
+```
+
+本地 Ollama：
+
+```powershell
+$env:LAAP_PROVIDER="ollama"
+$env:LAAP_BASE_URL="http://127.0.0.1:11434"
+$env:LAAP_MODEL="llama3.2"
+$env:LAAP_API_KEY=""
+```
+
+验证配置时只输出 provider/model，不输出 key：
+
+```powershell
+Write-Output "provider=$env:LAAP_PROVIDER model=$env:LAAP_MODEL key_set=$([bool]$env:LAAP_API_KEY)"
+```
+
 ## 运行 canonical AGI Runtime
 
 ```powershell

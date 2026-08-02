@@ -209,7 +209,7 @@ class AGIAgent:
 
         # Canonical PSI orchestration boundary. The driver owns the turn
         # transaction; this class owns the cognitive module implementation.
-        self.psi_driver = PSIDriver(self)
+        self.psi_driver = PSIDriver(self, llm_channel=self._build_llm_channel())
         self._psi_driver_active = False
 
         # ── P0-1: 打通世界模型 ↔ 因果引擎的连接 ──
@@ -278,6 +278,32 @@ class AGIAgent:
     # ════════════════════════════════════════════════════════
     # Main Interaction Pipeline
     # ════════════════════════════════════════════════════════
+
+    @staticmethod
+    def _build_llm_channel():
+        """Build the configured LAAP provider as the PSI Act channel."""
+        import os
+        try:
+            from laap.llm.factory import LLMFactory
+            from laap.llm.provider import Message
+            provider_name = os.environ.get("LAAP_PROVIDER", "").lower()
+            api_key = os.environ.get("LAAP_API_KEY", "")
+            if not provider_name or (not api_key and provider_name not in {"ollama", "local"}):
+                return None
+            factory = LLMFactory(default_provider=provider_name, default_model=os.environ.get("LAAP_MODEL") or None)
+            provider = factory.get(
+                provider_name,
+                model=os.environ.get("LAAP_MODEL") or None,
+                api_key=api_key or None,
+                base_url=os.environ.get("LAAP_BASE_URL") or None,
+            )
+            def channel(prompt: str):
+                message = provider.chat([Message(role="user", content=prompt)])
+                return {"text": getattr(message, "content", str(message))}
+            return channel
+        except Exception as exc:
+            logger.warning(f"Configured LAAP LLM channel unavailable: {exc}")
+            return None
 
     @staticmethod
     def _run_async_from_sync(async_fn, *args, **kwargs):
