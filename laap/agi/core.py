@@ -299,7 +299,10 @@ class AGIAgent:
             )
             def channel(prompt: str):
                 message = provider.chat([Message(role="user", content=prompt)])
-                return {"text": getattr(message, "content", str(message))}
+                text = getattr(message, "content", str(message))
+                if not text:
+                    raise RuntimeError("LLM provider returned an empty response")
+                return {"text": text}
             return channel
         except Exception as exc:
             logger.warning(f"Configured LAAP LLM channel unavailable: {exc}")

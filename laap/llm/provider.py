@@ -557,6 +557,9 @@ class OpenAICompatProvider(LLMProvider):
 
         with httpx.stream("POST", f"{self.base_url}/chat/completions",
                           headers=headers, json=payload, timeout=120) as resp:
+            if resp.status_code >= 400:
+                detail = resp.text[:500].replace("\\n", " ")
+                raise RuntimeError(f"LLM HTTP {resp.status_code}: {detail}")
             for line in resp.iter_lines():
                 if not line.startswith("data: "):
                     continue
