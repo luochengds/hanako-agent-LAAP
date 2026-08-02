@@ -6,13 +6,13 @@ set "PYTHON=%ROOT%.venv\Scripts\python.exe"
 
 if not exist "%PYTHON%" (
   echo [Hanako] Python virtual environment not found. Installing dependencies...
-  call "%ROOT%自动安装依赖.bat"
+  call "%ROOT%scripts\bootstrap.bat"
   if errorlevel 1 exit /b %errorlevel%
 )
 
 if not exist "%ROOT%hanako\node_modules" (
   echo [Hanako] Node dependencies not found. Installing dependencies...
-  call "%ROOT%自动安装依赖.bat" --skip-python
+  call "%ROOT%scripts\bootstrap.bat" --skip-python
   if errorlevel 1 exit /b %errorlevel%
 )
 
