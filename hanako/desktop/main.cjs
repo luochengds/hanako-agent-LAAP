@@ -629,22 +629,6 @@ function signalPidOnPosix(pid, force = false) {
   }
 }
 
-function forceKillPidOnWindows(pid) {
-  if (process.platform !== "win32") return false;
-  if (!Number.isInteger(Number(pid)) || Number(pid) <= 0) return false;
-  try {
-    const { execFileSync } = require("child_process");
-    const result = execFileSync(
-      "taskkill",
-      ["/F", "/PID", String(pid)],
-      { timeout: 5000, windowsHide: true, stdio: "pipe" }
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 /** 跨平台标题栏选项：macOS hiddenInset + 红绿灯，Windows/Linux 无框 */
 function windowIconOpts() {
   if (process.platform === "win32") {
@@ -1195,9 +1179,7 @@ async function startServer() {
           knownDead = await waitForProcessExit(null, existingInfo.pid, SERVER_FORCE_KILL_WAIT_MS);
         }
         if (!knownDead && process.platform === "win32") {
-          console.warn(`[desktop] 残留 server PID ${existingInfo.pid} 优雅关闭失败，Windows 下强制终止`);
-          forceKillPidOnWindows(existingInfo.pid);
-          knownDead = await waitForProcessExit(null, existingInfo.pid, SERVER_FORCE_KILL_WAIT_MS);
+          console.warn(`[desktop] 残留 server PID ${existingInfo.pid} 未被 native Job guardian 确认收敛，保留 server-info.json`);
         }
       } else {
         console.warn(`[desktop] server-info 不可信，拒绝复用且不自动终止 PID ${existingInfo.pid}: ${verification.reason}`);
@@ -1205,9 +1187,7 @@ async function startServer() {
         // 短宽限观察它是否自行退出，避免误判成长期残留
         knownDead = await waitForProcessExit(null, existingInfo.pid, STALE_SERVER_EXIT_GRACE_MS);
         if (!knownDead && process.platform === "win32") {
-          console.warn(`[desktop] 残留 server PID ${existingInfo.pid} 未自行退出，Windows 下强制终止`);
-          forceKillPidOnWindows(existingInfo.pid);
-          knownDead = await waitForProcessExit(null, existingInfo.pid, SERVER_FORCE_KILL_WAIT_MS);
+          console.warn(`[desktop] 残留 server PID ${existingInfo.pid} 未被 native Job guardian 确认收敛，保留 server-info.json`);
         }
       }
 
@@ -6109,9 +6089,7 @@ async function shutdownServer() {
         requestWindowsServerGuardianStop(proc);
         exited = await waitForProcessExit(proc, pid, SERVER_FORCE_KILL_WAIT_MS);
         if (!exited) {
-          console.warn(`[desktop] shutdownServer: Job 收敛失败，Windows 下强制终止 PID ${pid}`);
-          forceKillPidOnWindows(pid);
-          exited = await waitForProcessExit(proc, pid, SERVER_FORCE_KILL_WAIT_MS);
+          console.warn(`[desktop] shutdownServer: Job guardian 未确认 PID ${pid} 收敛，保留 server-info.json`);
         }
       } else {
         console.warn(`[desktop] shutdownServer: server PID ${pid} 未在 ${SERVER_SHUTDOWN_GRACE_MS}ms 内退出，强制终止`);

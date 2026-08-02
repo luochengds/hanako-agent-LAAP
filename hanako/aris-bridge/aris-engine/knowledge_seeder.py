@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # 添加 LAAP 模块路径
-_laap_agi = r"D:/LAAP/laap/agi"
+_repo_root = Path(os.environ.get("LAAP_ROOT", Path(__file__).resolve().parents[3]))
+_laap_agi = str(_repo_root / "laap" / "agi")
 if os.path.isdir(_laap_agi) and _laap_agi not in sys.path:
     sys.path.insert(0, _laap_agi)
 
@@ -167,7 +168,7 @@ class KnowledgeSeeder:
             return {"error": "WorldModel 未设置"}
 
         if memory_path is None:
-            memory_path = "D:/LAAP/aris-memory.md"
+            memory_path = str(_repo_root / "aris-memory.md")
 
         path = Path(memory_path)
         if not path.exists():

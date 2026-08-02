@@ -19,6 +19,7 @@ Aris Engine 主入口 v1.0
 """
 
 import sys
+import os
 import time
 import json
 import logging
@@ -230,7 +231,7 @@ def cmd_inspect():
     print()
 
     # LAAP 路径
-    laap_root = Path("D:/LAAP")
+    laap_root = Path(os.environ.get("LAAP_ROOT", Path(__file__).resolve().parents[3]))
     print(f"  📁 LAAP 根目录: {laap_root}")
     print(f"     存在: {'✅' if laap_root.exists() else '❌'}")
 

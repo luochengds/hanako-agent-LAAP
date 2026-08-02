@@ -31,6 +31,11 @@ pnpm-lock.yaml
 dist/
 dist-*/
 build/
+# Deterministic source-audit receipts are required by source checkouts.
+!hanako/build/
+hanako/build/*
+!hanako/build/persistence-store-inventory.json
+!hanako/build/persistence-startup-receipt.json
 out/
 release/
 .cache/
@@ -112,8 +117,17 @@ identity_registry.json
 sign-key*.json
 
 # LAAP runtime
+.agent_events.json
+.agent_registry.json
+.agent_knowledge_graph.json
+.task_board.json
 memory_vault/
+# The compatibility implementation is source code; runtime vault databases
+# remain ignored by the *.db rule below.
+!laap/memory_vault/
+!laap/memory_vault/**
 state/
+hanako/aris-bridge/aris-engine/memory/
 aris-sidecar.lock
 aris-sidecar.token
 *.db

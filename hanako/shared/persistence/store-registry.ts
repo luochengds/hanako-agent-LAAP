@@ -1283,6 +1283,15 @@ export const PERSISTENCE_EXEMPTIONS: readonly PersistenceExemption[] = Object.fr
     "tmpDir",
   ),
   exemption(
+    "channel-conversation-export-temp",
+    "lib/channels/conversation-export.ts",
+    "lib/channels/conversation-export.ts",
+    "Writes request-scoped JSON and DOCX intermediates under scripts/ and removes them after export; no durable store is implied.",
+    "2027-01-31",
+    ["write-file", "remove-path"],
+    "(?:tempJson|tempDocx)",
+  ),
+  exemption(
     "desktop-caller-selected-output",
     "desktop/main.cjs",
     "desktop/main.cjs",

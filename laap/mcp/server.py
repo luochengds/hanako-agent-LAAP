@@ -83,7 +83,20 @@ class LAAPMCPServer:
         if not HAS_FASTMCP:
             raise ImportError("pip install mcp")
 
-        mcp = FastMCP(self.name, log_level="WARNING")
+        # FastMCP >= 1.x takes host/port at construction time; older
+        # versions accepted them in ``run``.  Keep the wrapper compatible
+        # while using the current API correctly.
+        import inspect
+        fastmcp_kwargs = {"log_level": "WARNING"}
+        try:
+            parameters = inspect.signature(FastMCP).parameters
+            if "host" in parameters:
+                fastmcp_kwargs["host"] = getattr(self, "_host", "127.0.0.1")
+            if "port" in parameters:
+                fastmcp_kwargs["port"] = getattr(self, "_port", 8766)
+        except (TypeError, ValueError):
+            pass
+        mcp = FastMCP(self.name, **fastmcp_kwargs)
 
         # ── Agent Tools ──────────────────────────────────────
         @mcp.tool()
@@ -658,11 +671,15 @@ class LAAPMCPServer:
 
     def run_sse(self, host: str = "127.0.0.1", port: int = 8766):
         """Run the MCP server over SSE transport."""
+        self._host = host
+        self._port = port
         if not self._server:
             self.build_server()
         self._running = True
         logger.info(f"MCP server '{self.name}' running on http://{host}:{port}/sse")
-        self._server.run(transport="sse", host=host, port=port)
+        # Current FastMCP reads host/port from its settings and only accepts
+        # the transport here.
+        self._server.run(transport="sse")
 
     def stop(self):
         """Stop the MCP server."""

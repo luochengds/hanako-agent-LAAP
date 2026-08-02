@@ -22,9 +22,11 @@ import json, os, sys, time, logging, subprocess, re, textwrap, hashlib
 from pathlib import Path
 from collections import defaultdict
 
+from laap.config.paths import get_laap_root
+
 logger = logging.getLogger("laap.agi.evolution_engine")
 
-LAAP_ROOT = Path(os.environ.get("LAAP_ROOT", r"D:\LAAP"))
+LAAP_ROOT = get_laap_root()
 SKILL_DIR = Path(os.environ.get("HERMES_HOME", 
     os.path.expanduser("~/AppData/Local/hermes/profiles/laap-avatar/skills")))
 MEMORY_FILE = LAAP_ROOT / ".evolution_memory.json"

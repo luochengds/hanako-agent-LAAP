@@ -484,7 +484,9 @@ describe('channel-actions', () => {
       try {
         const { exportCurrentConversation } = await import('../../stores/channel-actions');
         await expect(exportCurrentConversation()).resolves.toBe('hana-chat-archive.md');
-        expect(mockFetch).toHaveBeenCalledWith('/api/conversations/ch_family/export');
+        expect(mockFetch).toHaveBeenCalledWith('/api/conversations/ch_family/export', {
+          throwOnHttpError: false,
+        });
         expect(click).toHaveBeenCalledOnce();
         expect(revokeObjectURL).toHaveBeenCalledWith('blob:archive');
       } finally {
@@ -507,7 +509,9 @@ describe('channel-actions', () => {
 
       const { exportCurrentConversation } = await import('../../stores/channel-actions');
       await expect(exportCurrentConversation()).rejects.toThrow('stop after URL assertion');
-      expect(mockFetch).toHaveBeenCalledWith('/api/conversations/dm%3Abob/export?agentId=alice');
+      expect(mockFetch).toHaveBeenCalledWith('/api/conversations/dm%3Abob/export?agentId=alice', {
+        throwOnHttpError: false,
+      });
     });
   });
 

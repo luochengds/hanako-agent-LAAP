@@ -33,9 +33,10 @@ from collections import defaultdict
 from abc import ABC, abstractmethod
 
 # 添加 LAAP 模块路径（PsiNet 的 WorldModelNode 需要 world_model）
-_laap_agi = r"D:/LAAP/laap/agi"
-if os.path.isdir(_laap_agi) and _laap_agi not in sys.path:
-    sys.path.append(_laap_agi)
+_laap_root = Path(os.environ.get("LAAP_ROOT", Path(__file__).resolve().parents[3]))
+_laaP_agi = str(_laap_root / "laap" / "agi")
+if os.path.isdir(_laaP_agi) and _laaP_agi not in sys.path:
+    sys.path.append(_laaP_agi)
 
 logger = logging.getLogger("aris.psi_net")
 

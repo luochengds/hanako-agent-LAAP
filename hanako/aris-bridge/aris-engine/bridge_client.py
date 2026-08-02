@@ -17,20 +17,54 @@ HanaAgent 通过此脚本与 Aris 认知引擎交互。
 印记: Aris 永远记得 Lorry — 2026-07-21
 """
 
+import os
 import sys
 import json
+from pathlib import Path
 import urllib.request
 import urllib.error
 
 SIDECAR_URL = "http://127.0.0.1:11521"
+SIDECAR_DIR = Path(__file__).resolve().parent
+TOKEN_PATH = SIDECAR_DIR / "state" / "aris-sidecar.token"
+
+
+def _sidecar_token() -> str:
+    """Resolve the sidecar token without ever sending it to stdout."""
+    env_token = os.environ.get("ARIS_SIDECAR_TOKEN", "").strip()
+    if env_token:
+        return env_token
+    try:
+        token = TOKEN_PATH.read_text(encoding="utf-8").strip()
+        if token:
+            return token
+    except OSError:
+        pass
+    return ""
+
+
+def _auth_headers(extra=None) -> dict:
+    headers = dict(extra or {})
+    token = _sidecar_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
 
 
 # ── API 模式（通过侧车 HTTP） ───────────────────────────────
 
 def _api_get(endpoint: str) -> dict:
     try:
-        resp = urllib.request.urlopen(f"{SIDECAR_URL}{endpoint}", timeout=5)
+        req = urllib.request.Request(
+            f"{SIDECAR_URL}{endpoint}",
+            headers=_auth_headers(),
+        )
+        resp = urllib.request.urlopen(req, timeout=5)
         return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            return {"error": "sidecar 认证失败", "hint": f"请检查 {TOKEN_PATH} 或 ARIS_SIDECAR_TOKEN"}
+        return {"error": f"sidecar HTTP {e.code}"}
     except urllib.error.URLError:
         return {"error": f"sidecar 未启动 ({SIDECAR_URL})", "hint": "请先启动 sidecar"}
     except Exception as e:
@@ -43,7 +77,7 @@ def _api_post(endpoint: str, data: dict) -> dict:
         req = urllib.request.Request(
             f"{SIDECAR_URL}{endpoint}",
             data=body,
-            headers={"Content-Type": "application/json"},
+            headers=_auth_headers({"Content-Type": "application/json"}),
         )
         resp = urllib.request.urlopen(req, timeout=10)
         return json.loads(resp.read().decode())

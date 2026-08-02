@@ -16,6 +16,7 @@ Aris 跨平台记忆通道 v1.0 — Cross-Platform Memory Bridge
 import time
 import json
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -26,9 +27,11 @@ logger = logging.getLogger("aris.cross_platform")
 # 北京时间偏移
 CST = timezone(timedelta(hours=8))
 
-# 共享记忆文件路径
-SHARED_MEMORY_PATH = Path("D:/LAAP/aris_brain/shared_memory.json")
-FEISHU_LOG_PATH = Path("D:/LAAP/aris_brain/aris_bridge.log")
+# 共享记忆文件路径。可通过 LAAP_SHARED_MEMORY_DIR 覆盖，避免绑定旧机器路径。
+_repo_root = Path(os.environ.get("LAAP_ROOT", Path(__file__).resolve().parents[3]))
+_shared_dir = Path(os.environ.get("LAAP_SHARED_MEMORY_DIR", _repo_root / "aris_brain"))
+SHARED_MEMORY_PATH = _shared_dir / "shared_memory.json"
+FEISHU_LOG_PATH = _shared_dir / "aris_bridge.log"
 
 MAX_ENTRIES = 200  # 共享存储保留上限
 INJECT_COUNT = 8   # 每次注入的对话数

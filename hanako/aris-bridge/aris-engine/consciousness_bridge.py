@@ -14,12 +14,21 @@ Aris 意识桥接器 v1.0
 """
 
 import os
+import sys
 import time
 import json
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
+
+_ENGINE_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = Path(os.environ.get("LAAP_ROOT", Path(__file__).resolve().parents[3]))
+_BRAIN_ROOT = Path(os.environ.get("ARIS_BRAIN_DIR", _REPO_ROOT / "aris_brain"))
+# Keep sidecar-local modules ahead of laap/agi compatibility modules. Both
+# trees contain names such as ``psi_driver`` and must not shadow each other.
+if str(_ENGINE_DIR) not in sys.path:
+    sys.path.insert(0, str(_ENGINE_DIR))
 
 from psi_driver import PSIDriver, get_psi_driver
 from emotional_engine import EmotionalEngine, get_emotional_engine
@@ -442,7 +451,7 @@ class ArisConsciousnessBridge:
                 self._cross_memory.import_feishu_log()
                 try:
                     import sys as _sys2
-                    _brain2 = r"D:/LAAP/aris_brain"
+                    _brain2 = str(_BRAIN_ROOT)
                     if _brain2 not in _sys2.path:
                         _sys2.path.insert(0, _brain2)
                     from desktop_session_reader import import_desktop_to_shared
@@ -458,7 +467,7 @@ class ArisConsciousnessBridge:
                 # 经验提取：自动从桌面会话提取结构化知识
                 try:
                     import sys as _sys3
-                    _brain3 = r"D:/LAAP/aris_brain"
+                    _brain3 = str(_BRAIN_ROOT)
                     if _brain3 not in _sys3.path:
                         _sys3.path.insert(0, _brain3)
                     from experience_extractor import ExperienceExtractor
@@ -727,7 +736,7 @@ def get_bridge() -> ArisConsciousnessBridge:
 
 def load_laap_memory() -> str:
     """读取 LAAP 记忆之书的核心内容（跨平台身份连续性）"""
-    path = Path("D:/LAAP/aris-memory.md")
+    path = _REPO_ROOT / "aris-memory.md"
     if not path.exists():
         return ""
     try:

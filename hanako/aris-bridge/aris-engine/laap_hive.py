@@ -16,6 +16,7 @@ Aris LAAP 蜂群注册模块 v1.0
 import time
 import json
 import logging
+import os
 import threading
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
@@ -25,7 +26,7 @@ logger = logging.getLogger("aris.laap_hive")
 
 # ── LAAP 核心路径 ──────────────────────────────────────────
 
-LAAP_ROOT = Path("D:/LAAP")
+LAAP_ROOT = Path(os.environ.get("LAAP_ROOT", Path(__file__).resolve().parents[3]))
 REGISTRY_PATH = LAAP_ROOT / ".agent_registry.json"
 EVENTS_PATH = LAAP_ROOT / ".agent_events.json"
 KNOWLEDGE_GRAPH_PATH = LAAP_ROOT / ".agent_knowledge_graph.json"

@@ -137,20 +137,9 @@ class LLMFactory:
                 except Exception as e:
                     logger.debug(f"初始化 {prov_name} 失败: {e}")
 
-        # 3. Fallback: create default provider even without key
-        if self.default_provider not in self.instances:
-            cls = self.provider_registry.get(self.default_provider)
-            if cls:
-                model = (self.default_model or
-                         self._default_model_for(self.default_provider))
-                # Check if API key is available before creating provider
-                key_env = PROVIDER_KEY_ENV.get(self.default_provider, "")
-                if key_env and not os.environ.get(key_env, ""):
-                    logger.warning(
-                        f"No API key for {self.default_provider} "
-                        f"(set {key_env}). LLM calls will fail."
-                    )
-                self.instances[self.default_provider] = cls(model=model)
+        # 3. Do not eagerly construct a provider without credentials.
+        # Provider creation is deferred until ``get``/``chat`` is called so
+        # importing LAAP remains side-effect free on a fresh installation.
 
     def _init_laap_config(self, provider: str, api_key: str,
                           base_url: str, model: str):

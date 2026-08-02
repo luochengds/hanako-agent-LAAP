@@ -28,6 +28,7 @@ import logging
 import logging.handlers
 import socket
 import threading
+from pathlib import Path
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -88,10 +89,12 @@ SIDECAR_TOKEN = _load_or_create_token()
 # spec L435 硬约束：私钥永不离开 sidecar
 _PENDING_PRIVATE_KEYS: dict = {}
 
-# 精确定位 LAAP 模块路径（插在第二位，不覆盖本地模块）
-# 1) laap 包父目录（D:/LAAP）— 供 `import laap.memory_vault` 等包级导入
-# 2) laap/agi 子目录 — 供 `import conscious` 等模块级导入
-_laap_root = r"D:/LAAP"
+# 精确定位 LAAP 模块路径（插在第二位，不覆盖本地模块）。
+# sidecar 位于 repo/hanako/aris-bridge/aris-engine/，向上三级即仓库根目录。
+# 同时为所有被 sidecar 加载的 LAAP 模块提供统一根目录配置。
+_repo_root = Path(__file__).resolve().parents[3]
+os.environ.setdefault("LAAP_ROOT", str(_repo_root))
+_laap_root = str(_repo_root)
 if os.path.isdir(_laap_root) and _laap_root not in sys.path:
     sys.path.insert(1, _laap_root)
 _laap_agi = os.path.join(_laap_root, "laap", "agi")

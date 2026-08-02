@@ -105,14 +105,27 @@ export function prepareNodeRuntime({
   const ext = isWin ? "zip" : "tar.gz";
   const filename = `${nodeDirName}.${ext}`;
   const cachedArchive = path.join(cacheDir, filename);
-  const cachedNodeBin = isWin
-    ? path.join(cacheDir, nodeDirName, "node.exe")
-    : path.join(cacheDir, nodeDirName, "bin", "node");
-  const cachedNpmCli = isWin
-    ? path.join(cacheDir, nodeDirName, "node_modules", "npm", "bin", "npm-cli.js")
-    : path.join(cacheDir, nodeDirName, "lib", "node_modules", "npm", "bin", "npm-cli.js");
+  const targetNodeOverride = process.env.HANA_TARGET_NODE;
+  const useTargetNodeOverride = Boolean(
+    targetNodeOverride && fs.existsSync(targetNodeOverride),
+  );
+  const cachedNodeBin = useTargetNodeOverride
+    ? path.resolve(targetNodeOverride)
+    : isWin
+      ? path.join(cacheDir, nodeDirName, "node.exe")
+      : path.join(cacheDir, nodeDirName, "bin", "node");
+  const cachedNpmCli = useTargetNodeOverride
+    ? path.resolve(
+        process.env.HANA_TARGET_NPM_CLI ||
+          path.join(path.dirname(cachedNodeBin), "node_modules", "npm", "bin", "npm-cli.js"),
+      )
+    : isWin
+      ? path.join(cacheDir, nodeDirName, "node_modules", "npm", "bin", "npm-cli.js")
+      : path.join(cacheDir, nodeDirName, "lib", "node_modules", "npm", "bin", "npm-cli.js");
 
-  if (!fs.existsSync(cachedNodeBin)) {
+  if (useTargetNodeOverride) {
+    log(`[build-server] using HANA_TARGET_NODE=${cachedNodeBin}`);
+  } else if (!fs.existsSync(cachedNodeBin)) {
     const url = `https://nodejs.org/dist/${nodeVersion}/${filename}`;
     log(`[build-server] downloading Node.js ${nodeVersion} for ${platform}-${arch}...`);
     execSync(`curl --fail --location --show-error -o "${cachedArchive}" "${url}"`, { stdio: "inherit" });

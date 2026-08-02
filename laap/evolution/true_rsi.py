@@ -59,6 +59,7 @@ from laap.agi.code_evolution import (
 )
 from laap.security.zone_executor import ZoneExecutor, is_docker_available
 from laap.security.zones import SafetyZone
+from laap.config.paths import get_laap_root
 
 # optional cognitive fitness hook: when available, use it to score mutations
 # beyond pure pytest pass/fail. Kept optional to avoid hard dependency.
@@ -608,7 +609,7 @@ class TrueRSIEngine:
 
     def __init__(self, config: TrueRSIConfig | None = None) -> None:
         self.config = config or TrueRSIConfig()
-        self.repo_root = self.config.repo_root or os.getcwd()
+        self.repo_root = self.config.repo_root or str(get_laap_root())
 
         # 复用 M4 已有的子系统
         self.analyzer = CodeAnalyzer(self.repo_root)
@@ -974,7 +975,7 @@ class RSISandbox:
         repo_root: str = "",
         agent_name: str = "aris",
     ) -> None:
-        self.repo_root = repo_root or os.getcwd()
+        self.repo_root = repo_root or str(get_laap_root())
         self.agent_name = agent_name
         # in-memory 候选缓存（candidate_id -> RSICandidate）
         self._candidates: dict[str, RSICandidate] = {}

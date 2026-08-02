@@ -1009,8 +1009,18 @@ class GuardianRegistry:
         recent_abuse: List[Dict[str, Any]] = []
 
         # 取最近 20 条滥用事件（按时间倒序）
-        abuse_acts = [a for a in acts_snapshot if a.get("action") in self.ABUSE_ACTIONS]
-        abuse_acts.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+        abuse_acts = [
+            (index, act)
+            for index, act in enumerate(acts_snapshot)
+            if act.get("action") in self.ABUSE_ACTIONS
+        ]
+        # time.time() can have equal/low-resolution values on some platforms;
+        # use insertion order as a deterministic tie-breaker so the newest
+        # event is still first when timestamps collide.
+        abuse_acts.sort(
+            key=lambda item: (item[1].get("timestamp", 0), item[0]),
+            reverse=True,
+        )
         recent_abuse = [
             {
                 "act_id": a.get("act_id"),
@@ -1019,7 +1029,7 @@ class GuardianRegistry:
                 "reason": a.get("reason"),
                 "timestamp": a.get("timestamp"),
             }
-            for a in abuse_acts[:20]
+            for _, a in abuse_acts[:20]
         ]
 
         for entry in acts_snapshot:

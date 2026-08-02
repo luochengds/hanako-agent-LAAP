@@ -28,6 +28,8 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
 
+from laap.config.paths import get_state_dir
+
 import numpy as np
 
 logger = logging.getLogger("laap.agi.world_model")
@@ -1115,8 +1117,9 @@ class UnifiedWorldModel:
 
     # ─────────── 持久化 ───────────
 
-    def save(self, path: str = "D:/LAAP/aris_brain/state/unified_world_model.json"):
+    def save(self, path: str | None = None):
         """保存世界模型状态"""
+        path = path or str(get_state_dir() / "unified_world_model.json")
         data = {
             "version": self.version,
             "name": self.name,
@@ -1136,9 +1139,9 @@ class UnifiedWorldModel:
         logger.info(f"[UnifiedWorldModel] 保存到 {path}")
         return path
 
-    def load(self, path: str = "D:/LAAP/aris_brain/state/unified_world_model.json"):
+    def load(self, path: str | None = None):
         """加载世界模型状态"""
-        p = Path(path)
+        p = Path(path or get_state_dir() / "unified_world_model.json")
         if not p.exists():
             logger.warning(f"[UnifiedWorldModel] 状态文件不存在: {path}")
             return False

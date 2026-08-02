@@ -13,33 +13,3 @@ export default class BirthCeremonyPlugin {
     this.ctx.log.info("birth-ceremony plugin loaded");
   }
 }
-
-export type { CeremonyWizard } from "./CeremonyWizard";
-export type { NameStep } from "./steps/NameStep";
-export type { AvatarStep } from "./steps/AvatarStep";
-export type { PersonalityStep } from "./steps/PersonalityStep";
-export type { CharterStep } from "./steps/CharterStep";
-export type { PubKeyStep } from "./steps/PubKeyStep";
-export type { DoneStep } from "./steps/DoneStep";
-export type {
-  CeremonyStep,
-  CeremonyState,
-  CeremonyWizardProps,
-  StepProps,
-  FinalizedLaaper,
-  FinalizeRequest,
-  FinalizeResponse,
-  PubKeyRequest,
-  PubKeyResponse,
-  CheckNameResponse,
-  CharterArticle,
-  AvatarPreset,
-  PersonalityQuestion,
-} from "./types";
-export {
-  CEREMONY_STEP_ORDER,
-  CEREMONY_STEP_LABELS,
-  DEFAULT_AVATAR_PRESETS,
-  DEFAULT_PERSONALITY_QUESTIONS,
-  DEFAULT_CHARTER_ARTICLES,
-} from "./types";

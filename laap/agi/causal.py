@@ -27,6 +27,8 @@ from dataclasses import dataclass, field
 from collections import defaultdict
 from enum import Enum
 
+from laap.config.paths import get_state_dir
+
 import numpy as np
 
 logger = logging.getLogger("laap.agi.causal")
@@ -1522,8 +1524,9 @@ class UnifiedCausalEngine:
 
     # ─────────── 序列化 ───────────
 
-    def save(self, path: str = "D:/LAAP/aris_brain/state/unified_causal.json"):
+    def save(self, path: str | None = None):
         """持久化因果引擎状态"""
+        path = path or str(get_state_dir() / "unified_causal.json")
         data = {
             "version": "1.0",
             "created_at": self._created_at,
@@ -1539,9 +1542,9 @@ class UnifiedCausalEngine:
         logger.info(f"[CausalEngine] 保存到 {path}")
         return path
 
-    def load(self, path: str = "D:/LAAP/aris_brain/state/unified_causal.json"):
+    def load(self, path: str | None = None):
         """加载持久化的因果引擎状态"""
-        p = Path(path)
+        p = Path(path or get_state_dir() / "unified_causal.json")
         if not p.exists():
             logger.warning(f"[CausalEngine] 状态文件不存在: {path}")
             return False

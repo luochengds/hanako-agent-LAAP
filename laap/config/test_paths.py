@@ -90,8 +90,8 @@ def test_get_laap_root_derived_from_file_location(monkeypatch):
     monkeypatch.delenv("LAAP_ROOT", raising=False)
     root = get_laap_root()
     assert isinstance(root, Path)
-    # 本项目根目录名为 LAAP（d:\LAAP）
-    assert root.name == "LAAP"
+    # 仓库目录名可随迁移而变化，但必须包含 laap 包。
+    assert (root / "laap").is_dir()
 
 
 def test_get_hermes_root_from_env(tmp_path, monkeypatch):
