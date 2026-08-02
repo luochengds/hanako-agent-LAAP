@@ -144,6 +144,13 @@ class AGIAgent:
         self.total_interactions = 0
         self.interaction_history: List[Dict[str, Any]] = []
         self._interaction_lock = threading.Lock()
+        self._last_load_status: Dict[str, Any] = {
+            "main_state": "not_attempted",
+            "world_model": "not_attempted",
+            "unified_memory": "not_attempted",
+            "cognitive_bus": "not_attempted",
+            "degraded": False,
+        }
 
         # ── Initialize ──
         if enable_all:
@@ -702,6 +709,7 @@ class AGIAgent:
         if self.cognitive_bus:
             state["cognitive_bus"] = self.cognitive_bus.stats()
             state["cognitive_state_prompt"] = self.cognitive_bus.inject_cognitive_state_into_prompt()
+        state["load_status"] = dict(self._last_load_status)
 
         # Autonomy: next action
         if self.autonomy:
@@ -775,18 +783,42 @@ class AGIAgent:
         Restores module states from a previous save.
         """
         load_path = Path(path) if path else (self.state_dir / "agi_state.json" if self.state_dir else None)
+        self._last_load_status = {
+            "main_state": "missing",
+            "world_model": "missing",
+            "unified_memory": "missing",
+            "cognitive_bus": "missing",
+            "degraded": True,
+        }
         if not load_path or not load_path.exists():
             return False
 
         try:
             with open(load_path, 'r', encoding='utf-8') as f:
                 state = json.load(f)
+            self._last_load_status["main_state"] = "loaded"
 
             self.total_interactions = state.get("total_interactions", 0)
+            world_path = load_path.parent / "world_model.json"
             if self.world is not None and callable(getattr(self.world, "load", None)):
-                self.world.load(str(load_path.parent / "world_model.json"))
+                if world_path.exists():
+                    result = self.world.load(str(world_path))
+                    self._last_load_status["world_model"] = "loaded" if result else "corrupt"
+                else:
+                    self._last_load_status["world_model"] = "missing"
+            memory_path = load_path.parent / "unified_memory.json"
             if self.unified_memory is not None:
-                self.unified_memory.load(str(load_path.parent / "unified_memory.json"))
+                if memory_path.exists():
+                    result = self.unified_memory.load(str(memory_path))
+                    self._last_load_status["unified_memory"] = "loaded" if result else "corrupt"
+                else:
+                    self._last_load_status["unified_memory"] = "missing"
+            bus_path = load_path.parent / "cognitive_bus" / "cognitive_bus_state.json"
+            self._last_load_status["cognitive_bus"] = "loaded" if bus_path.exists() else "missing"
+            self._last_load_status["degraded"] = any(
+                self._last_load_status[key] != "loaded"
+                for key in ("world_model", "unified_memory", "cognitive_bus")
+            )
 
             # Restore self-knowledge to self-model
             if self.self_model and "self_knowledge" in state:
@@ -799,6 +831,8 @@ class AGIAgent:
             logger.info(f"AGI state loaded from {load_path}")
             return True
         except Exception as e:
+            self._last_load_status["main_state"] = "corrupt"
+            self._last_load_status["degraded"] = True
             logger.error(f"Failed to load state: {e}")
             return False
 

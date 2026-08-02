@@ -211,6 +211,7 @@ def compare(fixtures: List[str], state_root: Path) -> Dict[str, Any]:
         loaded_agent = EdgeAgent(name="partial-probe", state_dir=str(case_dir))
         partial_results[missing_name] = {
             "load_result": bool(loaded_agent.load()),
+            "load_status": loaded_agent.get_state().get("load_status"),
             "memory_count": loaded_agent.get_state().get("unified_memory", {}).get("episodic_memory_count"),
             "bus_cycles": loaded_agent.get_state().get("cognitive_bus", {}).get("cycles"),
             "world_entities": len(loaded_agent.world.entities),

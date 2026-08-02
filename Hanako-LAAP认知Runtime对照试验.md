@@ -208,7 +208,19 @@ corrupt_state_does_not_raise：True
 缺失 cognitive_bus_state.json：load=True，bus cycles 回到 0
 ```
 
-这说明主状态文件与 sidecar 的恢复目前是“尽力加载”语义，但没有向调用方暴露降级信息。下一步应增加结构化 `load_status`，明确报告每个 sidecar 的 loaded/missing/corrupt 状态，而不是简单依赖布尔值。
+这说明主状态文件与 sidecar 的恢复目前是“尽力加载”语义，但没有向调用方暴露降级信息。现已增加结构化 `load_status`，报告每个状态层的 `loaded/missing/corrupt` 状态和总的 `degraded` 标志：
+
+```json
+{
+  "main_state": "loaded",
+  "world_model": "missing",
+  "unified_memory": "loaded",
+  "cognitive_bus": "loaded",
+  "degraded": true
+}
+```
+
+`load()` 继续保持兼容，返回值表示主状态是否可读取；详细恢复质量通过 `get_state()["load_status"]` 获取。
 
 ## 当前判断
 
