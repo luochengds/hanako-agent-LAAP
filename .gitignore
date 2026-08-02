@@ -96,6 +96,11 @@ target/
 Cargo.lock
 
 # === Data / Runtime ===
+.laap/
+.safe_rollback/
+.agent_events.json
+.agent_registry.json
+hanako/.cache/
 .env
 .env.*
 !.env.example
