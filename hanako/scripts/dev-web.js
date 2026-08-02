@@ -62,6 +62,9 @@ function spawnServer() {
   serverEnv.HANA_SERVER_ENTRY = path.join(rootDir, "server", "main-full.ts");
   serverEnv.HANA_CREATE_STARTUP_SESSION = "0";
   serverEnv.HANA_PORT = process.env.HANA_PORT || "0";
+  // Dev Web is the strict E2E surface: keep the PSI gate on even when the
+  // shell that launched npm did not export the flag explicitly.
+  serverEnv.LAAP_PSI_GATE_REQUIRED = process.env.LAAP_PSI_GATE_REQUIRED || "1";
   delete serverEnv.ELECTRON_RUN_AS_NODE;
 
   serverProcess = spawn(process.execPath, [path.join(rootDir, "server", "bootstrap.ts")], {
