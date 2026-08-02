@@ -288,17 +288,26 @@ else:
         agent = agents.get(agent_id)
         if not agent: raise HTTPException(404, "Agent not found")
         if hasattr(agent, 'rsi') and agent.rsi:
-            proposal = agent.rsi.step(agent, force=True)
-            return {"proposal": proposal.to_dict() if proposal else None,
-                    "rsi_status": agent.rsi.status(),
-                    "fitness": agent.evaluator.report(agent) if hasattr(agent, 'evaluator') else None}
+            from laap.runtime import PSITurnGateway
+            gateway = getattr(agent, "psi_gateway", None) or PSITurnGateway.default()
+            def perform_rsi():
+                proposal = agent.rsi.step(agent, force=True)
+                return {"proposal": proposal.to_dict() if proposal else None,
+                        "rsi_status": agent.rsi.status(),
+                        "fitness": agent.evaluator.report(agent) if hasattr(agent, 'evaluator') else None}
+            return gateway.invoke(f"rsi_action:{agent_id}", perform_rsi)
         return {"error": "RSI not enabled on this agent"}
 
     @app.post("/rsi/approve/{change_id}")
     async def approve_rsi_change(change_id: str, req: ApproveRSIChangeRequest) -> Dict[str, Any]:
         """人类审批并应用一次待处理的 RSI 自我改进变更。"""
         try:
-            attempt = rsi_engine.apply_change(change_id, req.approval_token)
+            from laap.runtime import PSITurnGateway
+            gateway = PSITurnGateway.default()
+            attempt = gateway.invoke(
+                f"rsi_action:approve:{change_id}",
+                lambda: rsi_engine.apply_change(change_id, req.approval_token),
+            )
             return {"status": "approved", "change_id": change_id,
                     "attempt": attempt.to_dict()}
         except ValueError as e:
@@ -339,13 +348,18 @@ else:
     @app.post("/triphase/memory/store")
     async def triphase_memory_store(req: MemoryStoreRequest) -> Dict[str, Any]:
         from laap.triphase_bridge.service import get_bridge
+        from laap.runtime import PSITurnGateway
         bridge = get_bridge()
-        item = bridge.store_memory(
-            text=req.text,
-            payload=req.payload,
-            key=req.key or None,
-            initial_evidence=req.initial_evidence,
-            tags=req.tags or None,
+        gateway = PSITurnGateway.default()
+        item = gateway.invoke(
+            "memory_mutation:store",
+            lambda: bridge.store_memory(
+                text=req.text,
+                payload=req.payload,
+                key=req.key or None,
+                initial_evidence=req.initial_evidence,
+                tags=req.tags or None,
+            ),
         )
         return {"success": True, "item": item}
 
