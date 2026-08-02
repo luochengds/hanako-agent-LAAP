@@ -1,6 +1,7 @@
 import type { ContentBlock, ToolCall } from '../stores/chat-types';
 import { renderMarkdown } from './markdown';
 import { parseCardFromContent, parseMoodFromContent } from './message-parser';
+import { stripToolProtocolTagsFromProse } from '../../../../lib/tool-protocol-sanitizer';
 
 interface AssistantBlockInput {
   content: string;
@@ -23,12 +24,16 @@ export function buildAssistantBlocksFromContent({
   includeTextSource = false,
 }: AssistantBlockInput): ContentBlock[] {
   const blocks: ContentBlock[] = [];
+  // Provider protocol fragments (DSML/ANTML/XML tool calls) are internal
+  // transport syntax. They may arrive as assistant prose when a provider
+  // emits malformed or partially recovered tool output; never render them.
+  const visibleContent = stripToolProtocolTagsFromProse(content || '');
 
   if (thinking !== null && thinking !== undefined) {
     blocks.push({ type: 'thinking', content: thinking, sealed: true });
   }
 
-  const { mood, yuan, text: afterMood } = parseMoodFromContent(content || '');
+  const { mood, yuan, text: afterMood } = parseMoodFromContent(visibleContent);
   if (mood && yuan) {
     blocks.push({ type: 'mood', yuan, text: mood });
   }
