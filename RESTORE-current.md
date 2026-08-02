@@ -70,9 +70,17 @@ Write-Output "provider=$env:LAAP_PROVIDER model=$env:LAAP_MODEL key_set=$([bool]
 
 ## 运行 canonical AGI Runtime
 
+AGIAgent 现在是默认认知 Runtime；无需设置 `LAAP_COGNITIVE_RUNTIME`。如需显式标记或兼容旧启动脚本，可设置：
+
 ```powershell
 $env:LAAP_COGNITIVE_RUNTIME="agi"
 $env:LAAP_PSI_RECEIPT_REQUIRED="1"
+```
+
+显式回退到旧 Bridge Runtime：
+
+```powershell
+$env:LAAP_COGNITIVE_RUNTIME="bridge"
 ```
 
 需要严格阻断降级认知状态时：

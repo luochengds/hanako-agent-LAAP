@@ -53,8 +53,8 @@ class BridgeCognitiveRuntime:
 class AGIAgentCognitiveRuntime:
     """Adapt the integrated AGIAgent cognitive pipeline.
 
-    This adapter is opt-in while the existing Bridge remains the default. The
-    AGIAgent pipeline performs the full cognitive assessment before language
+    This adapter is the canonical default; the existing Bridge remains an
+    explicit compatibility fallback. The AGIAgent pipeline performs the full cognitive assessment before language
     I/O; the response is recorded for the next learning/state persistence step
     without running a second PSI cycle for the same user turn.
     """

@@ -78,7 +78,9 @@ class PSITurnGateway:
     def default(cls) -> "PSITurnGateway":
         from .cognitive_runtime import AGIAgentCognitiveRuntime, BridgeCognitiveRuntime
 
-        if os.environ.get("LAAP_COGNITIVE_RUNTIME", "bridge").lower() == "agi":
+        # AGIAgent is the canonical subject runtime; Bridge remains the
+        # explicit compatibility fallback for maintenance and rollback.
+        if os.environ.get("LAAP_COGNITIVE_RUNTIME", "agi").lower() == "agi":
             return cls(AGIAgentCognitiveRuntime.create())
 
         from laap.agent.laap_bridge import get_bridge
