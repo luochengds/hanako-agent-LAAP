@@ -8,7 +8,8 @@ export type LaapPsiTurnHandle = {
 
 function required(): boolean {
   return process.env.LAAP_PSI_GATE_REQUIRED === "1"
-    || process.env.HANA_LAAP_PSI_REQUIRED === "1";
+    || process.env.HANA_LAAP_PSI_REQUIRED === "1"
+    || process.env.LAAP_COGNITIVE_RUNTIME?.toLowerCase() === "agi";
 }
 
 function sidecarBaseUrl(): string {
@@ -49,7 +50,10 @@ async function post(pathname: string, payload: Record<string, unknown>): Promise
 }
 
 export async function beginLaapPsiTurn(input: unknown): Promise<LaapPsiTurnHandle | null> {
-  if (!required()) return null;
+  if (!required()) {
+    console.log("[laap-psi-gate] disabled");
+    return null;
+  }
   const text = typeof input === "string" ? input : JSON.stringify(input);
   console.log(`[laap-psi-gate] begin required=true chars=${text.length}`);
   await post("/before_turn", { user_input: text });
