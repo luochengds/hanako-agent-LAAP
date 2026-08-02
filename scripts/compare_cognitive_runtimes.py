@@ -39,6 +39,17 @@ def _load_fixtures(path: str | None) -> List[str]:
     return raw
 
 
+def _numeric_delta(first: Any, last: Any) -> Dict[str, float]:
+    if not isinstance(first, dict) or not isinstance(last, dict):
+        return {}
+    delta = {}
+    for key in sorted(set(first) | set(last)):
+        left, right = first.get(key), last.get(key)
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+            delta[key] = round(float(right) - float(left), 6)
+    return delta
+
+
 def _run_runtime(name: str, runtime: Any, fixtures: Iterable[str]) -> Dict[str, Any]:
     turns = []
     for index, text in enumerate(fixtures, start=1):
@@ -62,11 +73,21 @@ def _run_runtime(name: str, runtime: Any, fixtures: Iterable[str]) -> Dict[str, 
             entry.update({"ok": False, "error": f"{type(exc).__name__}: {exc}"})
         entry["elapsed_ms"] = round((time.perf_counter() - started) * 1000, 3)
         turns.append(entry)
+    successful = [turn for turn in turns if turn["ok"]]
+    first_state = next((turn.get("context_summary", {}).get("cognitive_state") for turn in successful if turn.get("context_summary", {}).get("cognitive_state")), None)
+    last_state = next((turn.get("context_summary", {}).get("cognitive_state") for turn in reversed(successful) if turn.get("context_summary", {}).get("cognitive_state")), None)
     return {
         "runtime": name,
         "turns": turns,
         "success_count": sum(1 for turn in turns if turn["ok"]),
         "failure_count": sum(1 for turn in turns if not turn["ok"]),
+        "state_comparison": {
+            "first_needs": (first_state or {}).get("needs", {}),
+            "last_needs": (last_state or {}).get("needs", {}),
+            "needs_delta": _numeric_delta((first_state or {}).get("needs", {}), (last_state or {}).get("needs", {})),
+            "first_attention": (first_state or {}).get("attention", {}),
+            "last_attention": (last_state or {}).get("attention", {}),
+        },
     }
 
 
