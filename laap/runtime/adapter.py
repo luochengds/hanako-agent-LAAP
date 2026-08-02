@@ -13,8 +13,9 @@ class AgentLifecycleAdapter:
     only fills lifecycle fields that older API/CLI code expects.
     """
 
-    def __init__(self, backend: Any):
+    def __init__(self, backend: Any, *, psi_gateway: Any = None):
         self.backend = backend
+        self.psi_gateway = psi_gateway
 
     @property
     def id(self) -> str:
@@ -46,7 +47,21 @@ class AgentLifecycleAdapter:
         ) or 0)
 
     def run(self, task: str) -> str:
+        if self.psi_gateway is not None:
+            return self.psi_gateway.invoke(task, lambda: self.backend.run(task))
         return self.backend.run(task)
+
+    def chat(self, message: str, *args: Any, **kwargs: Any) -> Any:
+        operation = lambda: self.backend.chat(message, *args, **kwargs)
+        if self.psi_gateway is not None:
+            return self.psi_gateway.invoke(message, operation)
+        return operation()
+
+    def chat_stream(self, message: str, *args: Any, **kwargs: Any) -> Any:
+        operation = lambda: self.backend.chat_stream(message, *args, **kwargs)
+        if self.psi_gateway is not None:
+            return self.psi_gateway.stream(message, operation)
+        return operation()
 
     def chat(self, message: str, *args: Any, **kwargs: Any) -> Any:
         """Call backends with their supported chat signature."""

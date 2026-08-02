@@ -289,6 +289,26 @@ Sidecar 初始化与监听：通过
 
 Python 核心回归使用系统 Python 执行；项目 `.venv` 当前未安装 pytest。测试过程中产生的临时 `__pycache__` 已清理，Git 工作区保持干净。
 
+## PSI 输入/输出硬门控进度
+
+已新增：
+
+```text
+laap/runtime/psi_gateway.py
+```
+
+canonical API/CLI Agent 的：
+
+```text
+run()
+chat()
+chat_stream()
+```
+
+已经经过 PSI before/after 边界，并生成内存中的 turn receipt；PSI 边界初始化失败时不会静默绕过。
+
+当前为第一阶段硬门控：默认调用 `LaapBridge`，完整 `laap_brain` 不存在时使用 fallback cognitive kernel。它还没有覆盖 Codex/Lifelike 兼容分支，也没有把 Hanako Desktop 全部聊天路径统一接入 `laap.agi.PSIDriver`。
+
 ## 上传状态
 
 当前工作区仍是修复中的源码工作区，尚未作为最终稳定版本上传。

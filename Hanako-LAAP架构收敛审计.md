@@ -228,6 +228,8 @@ laap.agent_core.agent
 
 已新增 `laap/runtime/factory.py` 的 `create_runtime_agent()`，并将 API/CLI 的默认 Agent 分支切换到 canonical `agent_core.Agent(mode="agi")`，外层通过生命周期适配器保持旧字段契约；Codex/Lifelike 分支暂时继续走兼容层。
 
+新增 `laap/runtime/psi_gateway.py`。canonical API/CLI Agent 的 `run()`、`chat()`、`chat_stream()` 现在经过强制 PSI before/after 边界；PSI 初始化或边界失败时不静默绕过。当前默认使用仓库内 `LaapBridge`，若完整 `laap_brain` 不可用会使用其 fallback cognitive kernel，因此这是第一阶段硬门控，不等同于完整 `laap.agi.PSIDriver` 六阶段接管。
+
 真实 kernel Agent 适配探针已通过；新 Agent 的标识字段实际为 `_agent_id`，适配器已兼容该字段。启动时会记录可选 `model_tools` 未安装，但 kernel Agent 仍可创建并返回状态；这属于可选 Hermes 工具后端缺失，不是 runtime 入口阻断。
 
 真实 `run()` 探针发现并修复了一个实际接口问题：`Context.get_messages()` 返回 dict，而旧 Provider 要求消息对象提供 `to_dict()`。新增 `get_llm_messages()` 作为 typed provider view，并将 kernel Agent / conversation loop 的 Provider 调用切换到该视图；原 dict 兼容接口保持不变。
