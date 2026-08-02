@@ -274,19 +274,24 @@ AGIAgentCognitiveRuntime
 ```text
 生产默认：暂时保持 Bridge
 认知验证：使用 AGIAgent
-下一阶段：继续做 shadow mode 和状态一致性验证
+下一阶段：完成 PSIDriver canonical 接入，再做 shadow mode
 ```
 
-## 尚未完成的试验
+## 试验边界说明
 
-- 恢复前后需求状态精确一致性；
-- 恢复前后情绪状态精确一致性；
-- 恢复前后注意力状态精确一致性；
-- 长期记忆重复写入检查；
-- 异常输入和工具失败场景；
-- Shadow mode 双跑；
-- 真实模型输出的一致性与安全性；
-- 完整 `PSIDriver` 与 AGIAgent 的阶段化对照。
+本报告验证的是 **BridgeCognitiveRuntime 与 AGIAgentCognitiveRuntime 的行为、状态和持久化对照**，不是 `laap.agi.PSIDriver` 六阶段循环已经成为 canonical core 的证明。
+
+当前源码事实是：`AGIAgent.process_interaction(use_psi=True)` 运行的是 `AGIAgent.core` 自己的 CognitiveBus/PSI 阶段；`PSIDriver` 虽被导入，但尚未作为唯一 driver 接管该入口。因此：
+
+```text
+对照试验：已完成
+AGIAgent 持久化恢复：已完成
+需求/情绪/注意力/三类记忆恢复：已完成
+异常/缺失/损坏/严格降级门：已完成
+AGIAgent/PSIDriver/Bridge 唯一核心收敛：未完成
+完整 PSIDriver 六阶段接入且避免双重循环：未完成
+Shadow mode：未完成
+```
 
 ## Git 记录
 
