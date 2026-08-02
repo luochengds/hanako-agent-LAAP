@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from typing import Any, Dict
 
 
@@ -46,6 +47,24 @@ class AgentLifecycleAdapter:
 
     def run(self, task: str) -> str:
         return self.backend.run(task)
+
+    def chat(self, message: str, *args: Any, **kwargs: Any) -> Any:
+        """Call backends with their supported chat signature."""
+        method = self.backend.chat
+        signature = inspect.signature(method)
+        parameters = signature.parameters
+        accepts_var_kw = any(
+            p.kind == inspect.Parameter.VAR_KEYWORD
+            for p in parameters.values()
+        )
+        if not accepts_var_kw:
+            kwargs = {k: v for k, v in kwargs.items() if k in parameters}
+        positional_capacity = sum(
+            p.kind in (inspect.Parameter.POSITIONAL_ONLY,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD)
+            for p in parameters.values()
+        )
+        return method(message, *args[:max(0, positional_capacity - 1)], **kwargs)
 
     def status(self) -> Dict[str, Any]:
         status_fn = getattr(self.backend, "status", None)

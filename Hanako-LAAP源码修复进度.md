@@ -203,15 +203,7 @@ build-windows-sandbox-helper：通过大部分契约检查
 
 ### 当前环境限制
 
-当前 Windows 账户仍无法创建普通 SymbolicLink：
-
-```text
-New-Item -ItemType SymbolicLink：需要管理员权限
-```
-
-Developer Mode 已开启，但当前系统策略仍未允许本次终端创建普通符号链接；目录 Junction 可以创建。
-
-因此涉及真实 symlink 的测试在测试框架中被环境条件跳过/阻断，不能把它们解释成安全逻辑失败。完整 symlink 验收仍需要管理员 PowerShell 或允许创建符号链接的策略环境。
+普通权限终端创建 SymbolicLink 仍受系统策略限制，但已使用管理员 PowerShell 完成真实验证。
 
 Windows shell 测试当前：
 
@@ -223,7 +215,7 @@ Windows shell 测试当前：
 
 ## 当前剩余问题
 
-### 1. 全量测试仍有 55 个失败
+### 1. 全量测试仍有发行/平台类失败
 
 剩余失败主要集中在：
 
@@ -273,13 +265,29 @@ laap/cognition/
 
 ## 下一步计划
 
-1. 继续分类剩余 55 个测试失败；
-2. 只修复真正影响源码运行的失败；
-3. 将 CI/installer/seed/权限限制类测试单独标记；
-4. 验证新机器或干净目录中的完整源码启动；
-5. 清理测试状态和临时运行目录；
-6. 形成干净源码快照；
-7. 再决定是否上传源码快照。
+1. 完成 API/CLI 默认 Agent 迁移的联动回归；
+2. 将 Codex/Lifelike 兼容分支单独验证；
+3. 验证新机器或干净目录中的完整源码启动；
+4. 清理测试状态和临时运行目录；
+5. 形成干净源码快照；
+6. 再决定是否上传源码快照。
+
+## API/CLI 迁移后最终回归记录
+
+2026-08-02 16:27 完成迁移后定向回归：
+
+```text
+Python 核心：108 passed
+Hanako 核心：76 passed
+安全测试：43 passed
+TypeScript typecheck：通过
+API 默认 Agent 创建：通过
+Hanako server：通过
+MCP 入口：通过
+Sidecar 初始化与监听：通过
+```
+
+Python 核心回归使用系统 Python 执行；项目 `.venv` 当前未安装 pytest。测试过程中产生的临时 `__pycache__` 已清理，Git 工作区保持干净。
 
 ## 上传状态
 

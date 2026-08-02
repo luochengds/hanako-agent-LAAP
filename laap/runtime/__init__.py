@@ -8,8 +8,10 @@ migration; callers should import from ``laap.runtime`` going forward.
 from .agent import Agent, AgentConfig, AgentMode, AgentState, LAAPAgent
 from .contracts import AgentLifecycle, AgentRuntime
 from .adapter import AgentLifecycleAdapter
+from .factory import create_runtime_agent
 
 __all__ = [
     "Agent", "AgentConfig", "AgentMode", "AgentState", "LAAPAgent",
     "AgentRuntime", "AgentLifecycle", "AgentLifecycleAdapter",
+    "create_runtime_agent",
 ]

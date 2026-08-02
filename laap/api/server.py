@@ -158,7 +158,8 @@ else:
 
     @app.post("/agents/create")
     async def create_agent(req: CreateAgentRequest) -> Dict[str, Any]:
-        from laap.runtime.legacy import Agent, AgentConfig, LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
+        from laap.runtime import AgentConfig, create_runtime_agent
+        from laap.runtime.legacy import LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
         if req.type == "codex":
             config = CodexConfig(name=req.name, workspace_dir=req.workspace)
             agent = CodexAgent(config=config, llm_factory=factory)
@@ -167,7 +168,7 @@ else:
             agent = LifelikeAgent(config=config, llm_factory=factory)
         else:
             config = AgentConfig(name=req.name)
-            agent = Agent(config=config, llm_factory=factory)
+            agent = create_runtime_agent(config=config, llm_factory=factory)
         agents[agent.id] = agent
         return {"agent_id": agent.id, "name": agent.config.name,
                 "type": req.type, "status": agent.status()}

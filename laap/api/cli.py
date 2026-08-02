@@ -18,7 +18,8 @@ import argparse, sys, os, json, logging, subprocess, time
 from typing import Any, Dict, List, Optional
 
 from laap import __version__
-from laap.runtime.legacy import Agent, AgentConfig, LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
+from laap.runtime import AgentConfig, AgentLifecycleAdapter, create_runtime_agent
+from laap.runtime.legacy import LifelikeAgent, LifelikeConfig, CodexAgent, CodexConfig
 from laap.llm.factory import LLMFactory
 from laap.cli.repl import LAAP_REPL
 from laap.cli.skins import render_logo, GOLD, GOLD_BRIGHT, GOLD_DIM, RESET, BOLD, SYM
@@ -172,7 +173,7 @@ def check_api_keys() -> Dict[str, str]:
     return result
 
 
-def create_agent(args) -> Agent:
+def create_agent(args) -> AgentLifecycleAdapter:
     config_manager.apply_to_environment()
     provider = args.provider or os.environ.get("LAAP_PROVIDER", "openai")
     model = args.model or os.environ.get("LAAP_MODEL", "")
@@ -193,8 +194,11 @@ def create_agent(args) -> Agent:
             agent.awareness.set_task(args.task)
         return agent
     else:
-        return Agent(config=AgentConfig(name=args.name or "Agent", verbose=True),
-                     llm_factory=factory, show_banner=show_banner)
+        return create_runtime_agent(
+            config=AgentConfig(name=args.name or "Agent", verbose=True),
+            llm_factory=factory,
+            show_banner=show_banner,
+        )
 
 
 def run_task(agent: Agent, task: str):

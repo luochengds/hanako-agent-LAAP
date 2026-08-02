@@ -226,9 +226,27 @@ laap.agent_core.agent
 
 新增 `laap/runtime/adapter.py` 的 `AgentLifecycleAdapter`，在不改变后端实现的前提下兼容 `id/config/run/status/alive/step_count`，为下一步将 API/CLI 切换到新 Agent 提供安全转换层。
 
+已新增 `laap/runtime/factory.py` 的 `create_runtime_agent()`，并将 API/CLI 的默认 Agent 分支切换到 canonical `agent_core.Agent(mode="agi")`，外层通过生命周期适配器保持旧字段契约；Codex/Lifelike 分支暂时继续走兼容层。
+
 真实 kernel Agent 适配探针已通过；新 Agent 的标识字段实际为 `_agent_id`，适配器已兼容该字段。启动时会记录可选 `model_tools` 未安装，但 kernel Agent 仍可创建并返回状态；这属于可选 Hermes 工具后端缺失，不是 runtime 入口阻断。
 
 真实 `run()` 探针发现并修复了一个实际接口问题：`Context.get_messages()` 返回 dict，而旧 Provider 要求消息对象提供 `to_dict()`。新增 `get_llm_messages()` 作为 typed provider view，并将 kernel Agent / conversation loop 的 Provider 调用切换到该视图；原 dict 兼容接口保持不变。
+
+## 最终迁移回归记录
+
+2026-08-02 16:27 验证结果：
+
+```text
+Runtime/API probe：通过
+API /agents/create：HTTP 200
+Hanako server：监听 127.0.0.1:28903
+MCP 入口：通过
+Sidecar：完成初始化并监听 127.0.0.1:11521
+TypeScript typecheck：通过
+Python 核心：108 passed
+Hanako 核心：76 passed
+安全测试：43 passed
+```
 
 ## 当前结论
 
@@ -238,6 +256,6 @@ laap.agent_core.agent
 
 1. 冻结推荐入口；（已完成）
 2. 提取共享接口；
-3. 迁移 API/CLI；（第一步已完成：改走 runtime.legacy 兼容边界）
+3. 迁移 API/CLI；（默认 Agent 分支已切换到 `create_runtime_agent()`，Codex/Lifelike 保留兼容层）
 4. 保留兼容壳；（已完成）
 5. 用测试确认后再清理旧实现。
