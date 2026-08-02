@@ -2,6 +2,15 @@
 
 仓库提供统一依赖引导脚本：
 
+```bat
+REM Windows CMD / 双击入口
+scripts\bootstrap.bat
+scripts\bootstrap.bat --with-dev
+scripts\bootstrap.bat --dry-run
+```
+
+也可以使用 PowerShell：
+
 ```powershell
 # Windows：检测并安装运行依赖
 powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap.ps1
